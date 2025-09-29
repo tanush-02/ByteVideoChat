@@ -149,6 +149,7 @@ export default function Authentication() {
                             <p style={{ color: "red" }}>{error}</p>
 
                             <Button
+                                className='btn btn-primary'
                                 type="button"
                                 fullWidth
                                 variant="contained"

@@ -7,8 +7,12 @@ import server from "../environment";
 
 export const AuthContext = createContext({});
 
-const client = axios.create({
+const userClient = axios.create({
     baseURL: `${server}/api/v1/users`
+})
+
+const commentClient = axios.create({
+    baseURL: `${server}/api/v1/comments`
 })
 
 
@@ -24,7 +28,7 @@ export const AuthProvider = ({ children }) => {
 
     const handleRegister = async (name, username, password) => {
         try {
-            let request = await client.post("/register", {
+            let request = await userClient.post("/register", {
                 name: name,
                 username: username,
                 password: password
@@ -41,7 +45,7 @@ export const AuthProvider = ({ children }) => {
 
     const handleLogin = async (username, password) => {
         try {
-            let request = await client.post("/login", {
+            let request = await userClient.post("/login", {
                 username: username,
                 password: password
             });
@@ -51,7 +55,13 @@ export const AuthProvider = ({ children }) => {
 
             if (request.status === httpStatus.OK) {
                 localStorage.setItem("token", request.data.token);
-                router("/home")
+                const redirect = localStorage.getItem("postLoginRedirect");
+                if (redirect) {
+                    localStorage.removeItem("postLoginRedirect");
+                    router(redirect);
+                } else {
+                    router("/home")
+                }
             }
         } catch (err) {
             throw err;
@@ -60,7 +70,7 @@ export const AuthProvider = ({ children }) => {
 
     const getHistoryOfUser = async () => {
         try {
-            let request = await client.get("/get_all_activity", {
+            let request = await userClient.get("/get_all_activity", {
                 params: {
                     token: localStorage.getItem("token")
                 }
@@ -74,7 +84,7 @@ export const AuthProvider = ({ children }) => {
 
     const addToUserHistory = async (meetingCode) => {
         try {
-            let request = await client.post("/add_to_activity", {
+            let request = await userClient.post("/add_to_activity", {
                 token: localStorage.getItem("token"),
                 meeting_code: meetingCode
             });
@@ -84,9 +94,36 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
+    const getComments = async (section) => {
+        try {
+            let request = await commentClient.get("/", {
+                params: { section }
+            });
+            return request.data;
+        } catch (e) {
+            throw e;
+        }
+    }
+
+    const addComment = async (section, text) => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) throw new Error("Not authenticated");
+            let request = await commentClient.post("/", {
+                token,
+                section,
+                text
+            });
+            return request.data;
+        } catch (e) {
+            throw e;
+        }
+    }
+
 
     const data = {
-        userData, setUserData, addToUserHistory, getHistoryOfUser, handleRegister, handleLogin
+        userData, setUserData, addToUserHistory, getHistoryOfUser, handleRegister, handleLogin,
+        getComments, addComment
     }
 
     return (

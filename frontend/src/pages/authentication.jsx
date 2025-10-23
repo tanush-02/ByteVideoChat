@@ -1,25 +1,7 @@
 import * as React from 'react';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import CssBaseline from '@mui/material/CssBaseline';
-import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
-import Paper from '@mui/material/Paper';
-import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import Typography from '@mui/material/Typography';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { AuthContext } from '../contexts/AuthContext';
-import { Snackbar } from '@mui/material';
-
-
-
-// TODO remove, this demo shouldn't need to reset the theme.
-
-const defaultTheme = createTheme();
+import { Snackbar, Alert } from '@mui/material';
+import '../App.css';
 
 export default function Authentication() {
 
@@ -67,110 +49,124 @@ export default function Authentication() {
 
 
     return (
-        <ThemeProvider theme={defaultTheme}>
-            <Grid container component="main" sx={{ height: '100vh' }}>
-                <CssBaseline />
-                <Grid
-                    item
-                    xs={false}
-                    sm={4}
-                    md={7}
-                    sx={{
-                        backgroundImage: 'url(https://source.unsplash.com/random?wallpapers)',
-                        backgroundRepeat: 'no-repeat',
-                        backgroundColor: (t) =>
-                            t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                    }}
-                />
-                <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-                    <Box
-                        sx={{
-                            my: 8,
-                            mx: 4,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                        }}
+        <div className="authContainer">
+            {/* Background Elements */}
+            <div className="authBackground">
+                <div className="authGradient"></div>
+                <div className="authPattern"></div>
+            </div>
+
+            {/* Main Auth Card */}
+            <div className="authCard">
+                <div className="authHeader">
+                    <div className="authLogo">
+                        <div className="logoIcon">🎥</div>
+                        <h1>L O G I N</h1>
+                    </div>
+                    <p className="authSubtitle">
+                        {formState === 0 ? "Welcome back! Sign in to continue" : "Create your account to get started"}
+                    </p>
+                </div>
+
+                {/* Tab Switcher */}
+                <div className="authTabs">
+                    <button 
+                        className={`authTab ${formState === 0 ? 'active' : ''}`}
+                        onClick={() => setFormState(0)}
                     >
-                        <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-                            <LockOutlinedIcon />
-                        </Avatar>
+                        Sign In
+                    </button>
+                    <button 
+                        className={`authTab ${formState === 1 ? 'active' : ''}`}
+                        onClick={() => setFormState(1)}
+                    >
+                        Sign Up
+                    </button>
+                </div>
 
-
-                        <div>
-                            <Button variant={formState === 0 ? "contained" : ""} onClick={() => { setFormState(0) }}>
-                                Sign In
-                            </Button>
-                            <Button variant={formState === 1 ? "contained" : ""} onClick={() => { setFormState(1) }}>
-                                Sign Up
-                            </Button>
-                        </div>
-
-                        <Box component="form" noValidate sx={{ mt: 1 }}>
-                            {formState === 1 ? <TextField
-                                margin="normal"
-                                required
-                                fullWidth
-                                id="username"
-                                label="Full Name"
-                                name="username"
-                                value={name}
-                                autoFocus
+                {/* Form */}
+                <form className="authForm" onSubmit={(e) => { e.preventDefault(); handleAuth(); }}>
+                    {formState === 1 && (
+                        <div className="inputGroup">
+                            <label htmlFor="name"></label>
+                            <input
+                                type="text"
+                                id="name"
+                                value={name || ''}
                                 onChange={(e) => setName(e.target.value)}
-                            /> : <></>}
-
-                            <TextField
-                                margin="normal"
+                                placeholder="Enter your full name"
                                 required
-                                fullWidth
-                                id="username"
-                                label="Username"
-                                name="username"
-                                value={username}
-                                autoFocus
-                                onChange={(e) => setUsername(e.target.value)}
-
+                                className="authInput"
                             />
-                            <TextField
-                                margin="normal"
-                                required
-                                fullWidth
-                                name="password"
-                                label="Password"
-                                value={password}
-                                type="password"
-                                onChange={(e) => setPassword(e.target.value)}
+                        </div>
+                    )}
 
-                                id="password"
-                            />
+                    <div className="inputGroup">
+                        <label htmlFor="username"></label>
+                        <input
+                            type="text"
+                            id="username"
+                            value={username || ''}
+                            onChange={(e) => setUsername(e.target.value)}
+                            placeholder="Enter your username"
+                            required
+                            className="authInput"
+                        />
+                    </div>
 
-                            <p style={{ color: "red" }}>{error}</p>
+                    <div className="inputGroup">
+                        <label htmlFor="password"></label>
+                        <input
+                            type="password"
+                            id="password"
+                            value={password || ''}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Enter your password"
+                            required
+                            className="authInput"
+                        />
+                    </div>
 
-                            <Button
-                                className='btn btn-primary'
-                                type="button"
-                                fullWidth
-                                variant="contained"
-                                sx={{ mt: 3, mb: 2 }}
-                                onClick={handleAuth}
-                            >
-                                {formState === 0 ? "Login " : "Register"}
-                            </Button>
+                    {error && (
+                        <div className="errorMessage">
+                            <span className="errorIcon">⚠️</span>
+                            {error}
+                        </div>
+                    )}
 
-                        </Box>
-                    </Box>
-                </Grid>
-            </Grid>
+                    <button type="submit" className="authButton">
+                        <span className="buttonText">
+                            {formState === 0 ? "Sign In" : "Create Account"}
+                        </span>
+                        <span className="buttonIcon">→</span>
+                    </button>
+                </form>
 
+                {/* Footer */}
+                <div className="authFooter">
+                    <p>
+                        {formState === 0 ? "Don't have an account?" : "Already have an account?"}
+                        <button 
+                            className="authLink"
+                            onClick={() => setFormState(formState === 0 ? 1 : 0)}
+                        >
+                            {formState === 0 ? " Sign up" : " Sign in"}
+                        </button>
+                    </p>
+                </div>
+            </div>
+
+            {/* Snackbar for success messages */}
             <Snackbar
-
                 open={open}
                 autoHideDuration={4000}
-                message={message}
-            />
-
-        </ThemeProvider>
+                onClose={() => setOpen(false)}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert onClose={() => setOpen(false)} severity="success" sx={{ width: '100%' }}>
+                    {message}
+                </Alert>
+            </Snackbar>
+        </div>
     );
 }

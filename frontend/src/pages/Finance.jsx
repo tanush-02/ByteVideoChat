@@ -8,7 +8,7 @@ export default function Finance() {
     const [market, setMarket] = useState({
         nifty: 22450,
         sensex: 74320,
-        usdInr: 83.1
+        usdInr: 83.6
     })
 
     useEffect(() => {

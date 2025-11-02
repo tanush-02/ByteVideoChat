@@ -78,20 +78,42 @@ export default function Healthcare() {
                         </div>
                     )) : <p>No comments yet</p>}
                 </div>
-                <div className="inputGroup">
-                    <input className="authInput" placeholder="Share a thought..." value={newComment} onChange={(e) => setNewComment(e.target.value)} />
-                    <button className="primaryButton" onClick={async () => {
-                        try {
-                            await addComment('healthcare', newComment)
-                            setNewComment('')
-                            const list = await getComments('healthcare')
-                            setComments(list)
-                        } catch {
-                            localStorage.setItem('postLoginRedirect', `/#healthcare`)
-                            window.location.href = '/auth'
-                        }
-                    }}>Post</button>
-                </div>
+                {localStorage.getItem("token") ? (
+                    <div className="inputGroup">
+                        <input className="authInput" placeholder="Share a thought..." value={newComment} onChange={(e) => setNewComment(e.target.value)} />
+                        <button className="primaryButton" onClick={async () => {
+                            try {
+                                await addComment('healthcare', newComment)
+                                setNewComment('')
+                                const list = await getComments('healthcare')
+                                setComments(list)
+                            } catch (err) {
+                                console.error("Error posting comment:", err)
+                                alert("Failed to post comment. Please try again.")
+                            }
+                        }}>Post</button>
+                    </div>
+                ) : (
+                    <div style={{ 
+                        padding: '1rem', 
+                        background: '#f0f0f0', 
+                        borderRadius: '8px', 
+                        textAlign: 'center',
+                        border: '2px dashed #ccc'
+                    }}>
+                        <p style={{ marginBottom: '0.5rem', color: '#666' }}>You need to be logged in to comment</p>
+                        <button 
+                            className="primaryButton" 
+                            onClick={() => {
+                                localStorage.setItem('postLoginRedirect', `/#healthcare`)
+                                window.location.href = '/auth'
+                            }}
+                            style={{ marginTop: '0.5rem' }}
+                        >
+                            Login to Comment
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     )

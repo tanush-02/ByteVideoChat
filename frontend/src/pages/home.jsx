@@ -108,6 +108,24 @@ function HomeComponent() {
                                     <span>Create Meeting</span>
                                 </button>
                             </div>
+
+                            <div className="divider">
+                                <span>OR</span>
+                            </div>
+
+                            <div className="videoChatSection">
+                                <h3>Quick Video Chat</h3>
+                                <button 
+                                    className="actionButton videoChatButton"
+                                    onClick={() => {
+                                        const randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                                        navigate(`/${randomCode}`);
+                                    }}
+                                >
+                                    <span className="buttonIcon">📹</span>
+                                    <span>Start Video Chat</span>
+                                </button>
+                            </div>
                         </div>
 
                         {isCreating && meetingCode && (

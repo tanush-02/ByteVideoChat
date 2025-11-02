@@ -1,26 +1,40 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../contexts/AuthContext'
+import { fetchHealthTips, fetchHealthNews, generateAIInsight } from '../services/apiService'
+import { useNavigate } from 'react-router-dom'
+import './DomainPages.css'
 
 export default function Healthcare() {
     const { getComments, addComment } = useContext(AuthContext)
+    const navigate = useNavigate()
     const [comments, setComments] = useState([])
     const [newComment, setNewComment] = useState("")
-    const [vitals, setVitals] = useState({ heartRate: 72, stress: 0.32, sleepHours: 7.1 })
-    const [tips, setTips] = useState([
-        'Hydrate every hour',
-        'Take a 5-min stretch break',
-        'Blink often to relax your eyes',
-        'Short walk boosts creativity'
-    ])
+    const [loading, setLoading] = useState(true)
+    const [healthTip, setHealthTip] = useState('')
+    const [healthNews, setHealthNews] = useState(null)
+    const [aiInsight, setAiInsight] = useState('')
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            setVitals(prev => ({
-                heartRate: Math.max(54, Math.min(100, Math.round(prev.heartRate + (Math.random() * 6 - 3)))) ,
-                stress: Math.max(0.1, Math.min(0.95, +(prev.stress + (Math.random() * 0.1 - 0.05)).toFixed(2))),
-                sleepHours: Math.max(4, Math.min(9, +(prev.sleepHours + (Math.random() * 0.2 - 0.1)).toFixed(1)))
-            }))
-        }, 3500)
+        const loadHealthData = async () => {
+            setLoading(true)
+            try {
+                const [tip, news] = await Promise.all([
+                    fetchHealthTips(),
+                    fetchHealthNews()
+                ])
+                
+                setHealthTip(tip)
+                setHealthNews(news)
+                setAiInsight(generateAIInsight('healthcare', {}))
+            } catch (error) {
+                console.error('Error loading health data:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        loadHealthData()
+        const interval = setInterval(loadHealthData, 300000) // Update every 5 minutes
         return () => clearInterval(interval)
     }, [])
 
@@ -34,81 +48,118 @@ export default function Healthcare() {
         return () => clearInterval(id)
     }, [getComments])
 
-    const nextTip = tips[(Math.floor(Date.now() / 10000)) % tips.length]
+    const handleExpertChat = () => {
+        const randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        navigate(`/${randomCode}`);
+    }
 
     return (
-        <div className="pageContainer">
-            <h2>Healthcare</h2>
-            <div className="statsGrid">
-                <div className="statCard">
-                    <h3>Heart Rate</h3>
-                    <p className="statNumber">{vitals.heartRate} bpm</p>
-                </div>
-                <div className="statCard">
-                    <h3>Stress Level</h3>
-                    <p className="statNumber">{Math.round(vitals.stress * 100)}%</p>
-                </div>
-                <div className="statCard">
-                    <h3>Sleep (last night)</h3>
-                    <p className="statNumber">{vitals.sleepHours} h</p>
-                </div>
+        <div className="domain-container">
+            <div className="domain-header">
+                <h2>🩺 Healthcare & Wellness</h2>
+                <p className="domain-subtitle">AI-powered health insights and wellness guidance</p>
             </div>
 
-            <div className="recentActivity" style={{ marginTop: '2rem' }}>
-                <h3>Wellness Tip</h3>
-                <div className="activityItem">
-                    <span className="activityIcon">💡</span>
-                    <div className="activityDetails">
-                        <p>{nextTip}</p>
-                        <span className="activityTime">Updates every 10s</span>
+            {loading ? (
+                <div className="loading-state">
+                    <div className="spinner"></div>
+                    <p>Loading health insights...</p>
+                </div>
+            ) : (
+                <>
+                    <div className="stats-grid">
+                        <div className="stat-card health-card">
+                            <div className="stat-icon">❤️</div>
+                            <h3>Daily Wellness</h3>
+                            <p className="stat-content">{healthTip}</p>
+                            <p className="stat-update">Updated: {new Date().toLocaleTimeString()}</p>
+                        </div>
+                        <div className="stat-card health-card">
+                            <div className="stat-icon">💡</div>
+                            <h3>Health Tips</h3>
+                            <p className="stat-content">Stay hydrated, get regular exercise, and maintain a balanced diet for optimal health.</p>
+                            <p className="stat-update">Live Guidance</p>
+                        </div>
+                        <div className="stat-card health-card">
+                            <div className="stat-icon">📊</div>
+                            <h3>Wellness Metrics</h3>
+                            <p className="stat-content">Track your daily activity, sleep quality, and hydration levels for better health outcomes.</p>
+                            <p className="stat-update">AI Monitored</p>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <div className="recentActivity" style={{ marginTop: '2rem' }}>
-                <h3>Community Thoughts</h3>
-                <div style={{ maxHeight: 260, overflowY: 'auto', marginBottom: '1rem' }}>
-                    {comments.length ? comments.map((c) => (
-                        <div key={c._id} className="activityItem">
-                            <span className="activityIcon">👤</span>
-                            <div className="activityDetails">
-                                <p>{c.text}</p>
-                                <span className="activityTime">by {c.userId}</span>
+                    <div className="ai-insight-card">
+                        <div className="ai-header">
+                            <span className="ai-icon">🤖</span>
+                            <h3>AI Health Recommendation</h3>
+                        </div>
+                        <p className="ai-content">{aiInsight}</p>
+                        <p className="ai-timestamp">Generated at {new Date().toLocaleTimeString()}</p>
+                    </div>
+
+                    {healthNews && (
+                        <div className="news-card">
+                            <h3>📰 Latest Health Updates</h3>
+                            <p>{healthNews.content}</p>
+                            <span className="news-source">Source: {healthNews.source}</span>
+                        </div>
+                    )}
+
+                    <div className="expert-chat-card">
+                        <div className="expert-header">
+                            <span className="expert-icon">👨‍⚕️</span>
+                            <div>
+                                <h3>Need Medical Advice?</h3>
+                                <p>Connect with a healthcare expert for personalized consultation</p>
                             </div>
                         </div>
-                    )) : <p>No comments yet</p>}
+                        <button className="expert-button" onClick={handleExpertChat}>
+                            <span>📹</span>
+                            Start Video Consultation
+                        </button>
+                    </div>
+                </>
+            )}
+
+            <div className="community-section">
+                <h3>💬 Community Wellness</h3>
+                <div className="comments-display">
+                    {comments.length ? comments.map((c) => (
+                        <div key={c._id} className="comment-item">
+                            <span className="comment-icon">👤</span>
+                            <div className="comment-content">
+                                <p>{c.text}</p>
+                                <span className="comment-author">by {c.userId}</span>
+                            </div>
+                        </div>
+                    )) : <p className="no-comments">No discussions yet. Start a conversation!</p>}
                 </div>
                 {localStorage.getItem("token") ? (
-                    <div className="inputGroup">
-                        <input className="authInput" placeholder="Share a thought..." value={newComment} onChange={(e) => setNewComment(e.target.value)} />
-                        <button className="primaryButton" onClick={async () => {
-                            try {
-                                await addComment('healthcare', newComment)
-                                setNewComment('')
-                                const list = await getComments('healthcare')
-                                setComments(list)
-                            } catch (err) {
-                                console.error("Error posting comment:", err)
-                                alert("Failed to post comment. Please try again.")
-                            }
-                        }}>Post</button>
+                    <div className="comment-input-group">
+                        <input 
+                            className="comment-input" 
+                            placeholder="Share your wellness tip or question..." 
+                            value={newComment} 
+                            onChange={(e) => setNewComment(e.target.value)}
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter' && newComment.trim()) {
+                                    handlePostComment()
+                                }
+                            }}
+                        />
+                        <button className="post-button" onClick={handlePostComment} disabled={!newComment.trim()}>
+                            Post
+                        </button>
                     </div>
                 ) : (
-                    <div style={{ 
-                        padding: '1rem', 
-                        background: '#f0f0f0', 
-                        borderRadius: '8px', 
-                        textAlign: 'center',
-                        border: '2px dashed #ccc'
-                    }}>
-                        <p style={{ marginBottom: '0.5rem', color: '#666' }}>You need to be logged in to comment</p>
+                    <div className="login-prompt">
+                        <p>You need to be logged in to share insights</p>
                         <button 
-                            className="primaryButton" 
+                            className="login-button" 
                             onClick={() => {
                                 localStorage.setItem('postLoginRedirect', `/#healthcare`)
                                 window.location.href = '/auth'
                             }}
-                            style={{ marginTop: '0.5rem' }}
                         >
                             Login to Comment
                         </button>
@@ -117,6 +168,17 @@ export default function Healthcare() {
             </div>
         </div>
     )
+
+    async function handlePostComment() {
+        if (!newComment.trim()) return
+        try {
+            await addComment('healthcare', newComment)
+            setNewComment('')
+            const list = await getComments('healthcare')
+            setComments(list)
+        } catch (err) {
+            console.error("Error posting comment:", err)
+            alert("Failed to post comment. Please try again.")
+        }
+    }
 }
-
-

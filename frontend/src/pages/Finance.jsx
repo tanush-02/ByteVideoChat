@@ -1,24 +1,50 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../contexts/AuthContext'
+import { fetchExchangeRates, fetchStockData, generateAIInsight } from '../services/apiService'
+import { useNavigate } from 'react-router-dom'
+import './DomainPages.css'
 
 export default function Finance() {
     const { getComments, addComment } = useContext(AuthContext)
+    const navigate = useNavigate()
     const [comments, setComments] = useState([])
     const [newComment, setNewComment] = useState("")
+    const [loading, setLoading] = useState(true)
     const [market, setMarket] = useState({
-        nifty: 22450,
-        sensex: 74320,
-        usdInr: 83.6
+        nifty: 0,
+        sensex: 0,
+        usdInr: 0,
+        lastUpdated: null
     })
+    const [aiInsight, setAiInsight] = useState('')
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            setMarket(prev => ({
-                nifty: +(prev.nifty + (Math.random() * 40 - 20)).toFixed(2),
-                sensex: +(prev.sensex + (Math.random() * 70 - 35)).toFixed(2),
-                usdInr: +(prev.usdInr + (Math.random() * 0.08 - 0.04)).toFixed(3)
-            }))
-        }, 2500)
+        const loadMarketData = async () => {
+            setLoading(true)
+            try {
+                const [exchangeData, stockData] = await Promise.all([
+                    fetchExchangeRates(),
+                    fetchStockData()
+                ])
+                
+                const newMarket = {
+                    nifty: Math.round(stockData.nifty),
+                    sensex: Math.round(stockData.sensex),
+                    usdInr: parseFloat(exchangeData.usdInr.toFixed(3)),
+                    lastUpdated: new Date()
+                }
+                
+                setMarket(newMarket)
+                setAiInsight(generateAIInsight('finance', newMarket))
+            } catch (error) {
+                console.error('Error loading market data:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        loadMarketData()
+        const interval = setInterval(loadMarketData, 60000) // Update every minute
         return () => clearInterval(interval)
     }, [])
 
@@ -32,92 +58,128 @@ export default function Finance() {
         return () => clearInterval(id)
     }, [getComments])
 
-    const changeChip = (value) => (
-        <span style={{
-            color: value >= 0 ? '#22c55e' : '#ef4444',
-            background: 'rgba(255,255,255,0.08)',
-            padding: '4px 8px',
-            borderRadius: 8,
-            fontWeight: 700
-        }}>{value >= 0 ? '+' : ''}{value}</span>
-    )
+    const changeChip = (value, prevValue) => {
+        const change = value - prevValue
+        return (
+            <span className={`change-chip ${change >= 0 ? 'positive' : 'negative'}`}>
+                {change >= 0 ? '↑' : '↓'} {Math.abs(change).toFixed(2)}
+            </span>
+        )
+    }
+
+    const handleExpertChat = () => {
+        const randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        navigate(`/${randomCode}`);
+    }
 
     return (
-        <div className="pageContainer">
-            <h2>Finance</h2>
-            <div className="statsGrid">
-                <div className="statCard">
-                    <h3>NIFTY 50</h3>
-                    <p className="statNumber">{market.nifty}</p>
-                    {changeChip(+(market.nifty - 22450).toFixed(2))}
-                </div>
-                <div className="statCard">
-                    <h3>SENSEX</h3>
-                    <p className="statNumber">{market.sensex}</p>
-                    {changeChip(+(market.sensex - 74320).toFixed(2))}
-                </div>
-                <div className="statCard">
-                    <h3>USD/INR</h3>
-                    <p className="statNumber">{market.usdInr}</p>
-                    {changeChip(+(market.usdInr - 83.1).toFixed(3))}
-                </div>
+        <div className="domain-container">
+            <div className="domain-header">
+                <h2>💹 Finance & Markets</h2>
+                <p className="domain-subtitle">Real-time market data and financial insights powered by AI</p>
             </div>
 
-            <div className="recentActivity" style={{ marginTop: '2rem' }}>
-                <h3>Planning Insight</h3>
-                <div className="activityItem">
-                    <span className="activityIcon">📈</span>
-                    <div className="activityDetails">
-                        <p>{market.usdInr > 83 ? 'Consider USD expenses today; INR a bit weaker.' : 'Good day for INR purchases.'}</p>
-                        <span className="activityTime">Live simulated market ticks</span>
+            {loading ? (
+                <div className="loading-state">
+                    <div className="spinner"></div>
+                    <p>Loading real-time market data...</p>
+                </div>
+            ) : (
+                <>
+                    <div className="stats-grid">
+                        <div className="stat-card finance-card">
+                            <div className="stat-header">
+                                <h3>NIFTY 50</h3>
+                                <span className="live-badge">LIVE</span>
+                            </div>
+                            <p className="stat-number">{market.nifty.toLocaleString()}</p>
+                            {changeChip(market.nifty, 22450)}
+                            <p className="stat-update">Updated: {market.lastUpdated?.toLocaleTimeString()}</p>
+                        </div>
+                        <div className="stat-card finance-card">
+                            <div className="stat-header">
+                                <h3>SENSEX</h3>
+                                <span className="live-badge">LIVE</span>
+                            </div>
+                            <p className="stat-number">{market.sensex.toLocaleString()}</p>
+                            {changeChip(market.sensex, 74320)}
+                            <p className="stat-update">Updated: {market.lastUpdated?.toLocaleTimeString()}</p>
+                        </div>
+                        <div className="stat-card finance-card">
+                            <div className="stat-header">
+                                <h3>USD/INR</h3>
+                                <span className="live-badge">LIVE</span>
+                            </div>
+                            <p className="stat-number">{market.usdInr}</p>
+                            {changeChip(market.usdInr, 83.1)}
+                            <p className="stat-update">Updated: {market.lastUpdated?.toLocaleTimeString()}</p>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <div className="recentActivity" style={{ marginTop: '2rem' }}>
-                <h3>Community Thoughts</h3>
-                <div style={{ maxHeight: 260, overflowY: 'auto', marginBottom: '1rem' }}>
-                    {comments.length ? comments.map((c) => (
-                        <div key={c._id} className="activityItem">
-                            <span className="activityIcon">👤</span>
-                            <div className="activityDetails">
-                                <p>{c.text}</p>
-                                <span className="activityTime">by {c.userId}</span>
+                    <div className="ai-insight-card">
+                        <div className="ai-header">
+                            <span className="ai-icon">🤖</span>
+                            <h3>AI Financial Insight</h3>
+                        </div>
+                        <p className="ai-content">{aiInsight}</p>
+                        <p className="ai-timestamp">Generated at {new Date().toLocaleTimeString()}</p>
+                    </div>
+
+                    <div className="expert-chat-card">
+                        <div className="expert-header">
+                            <span className="expert-icon">👨‍💼</span>
+                            <div>
+                                <h3>Need Expert Advice?</h3>
+                                <p>Connect with a financial expert for personalized guidance</p>
                             </div>
                         </div>
-                    )) : <p>No comments yet</p>}
+                        <button className="expert-button" onClick={handleExpertChat}>
+                            <span>📹</span>
+                            Start Video Chat with Expert
+                        </button>
+                    </div>
+                </>
+            )}
+
+            <div className="community-section">
+                <h3>💬 Community Insights</h3>
+                <div className="comments-display">
+                    {comments.length ? comments.map((c) => (
+                        <div key={c._id} className="comment-item">
+                            <span className="comment-icon">👤</span>
+                            <div className="comment-content">
+                                <p>{c.text}</p>
+                                <span className="comment-author">by {c.userId}</span>
+                            </div>
+                        </div>
+                    )) : <p className="no-comments">No insights shared yet. Be the first!</p>}
                 </div>
                 {localStorage.getItem("token") ? (
-                    <div className="inputGroup">
-                        <input className="authInput" placeholder="Share a thought..." value={newComment} onChange={(e) => setNewComment(e.target.value)} />
-                        <button className="primaryButton" onClick={async () => {
-                            try {
-                                await addComment('finance', newComment)
-                                setNewComment('')
-                                const list = await getComments('finance')
-                                setComments(list)
-                            } catch (err) {
-                                console.error("Error posting comment:", err)
-                                alert("Failed to post comment. Please try again.")
-                            }
-                        }}>Post</button>
+                    <div className="comment-input-group">
+                        <input 
+                            className="comment-input" 
+                            placeholder="Share your financial insight..." 
+                            value={newComment} 
+                            onChange={(e) => setNewComment(e.target.value)}
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter' && newComment.trim()) {
+                                    handlePostComment()
+                                }
+                            }}
+                        />
+                        <button className="post-button" onClick={handlePostComment} disabled={!newComment.trim()}>
+                            Post
+                        </button>
                     </div>
                 ) : (
-                    <div style={{ 
-                        padding: '1rem', 
-                        background: '#f0f0f0', 
-                        borderRadius: '8px', 
-                        textAlign: 'center',
-                        border: '2px dashed #ccc'
-                    }}>
-                        <p style={{ marginBottom: '0.5rem', color: '#666' }}>You need to be logged in to comment</p>
+                    <div className="login-prompt">
+                        <p>You need to be logged in to share insights</p>
                         <button 
-                            className="primaryButton" 
+                            className="login-button" 
                             onClick={() => {
                                 localStorage.setItem('postLoginRedirect', `/#finance`)
                                 window.location.href = '/auth'
                             }}
-                            style={{ marginTop: '0.5rem' }}
                         >
                             Login to Comment
                         </button>
@@ -126,6 +188,17 @@ export default function Finance() {
             </div>
         </div>
     )
+
+    async function handlePostComment() {
+        if (!newComment.trim()) return
+        try {
+            await addComment('finance', newComment)
+            setNewComment('')
+            const list = await getComments('finance')
+            setComments(list)
+        } catch (err) {
+            console.error("Error posting comment:", err)
+            alert("Failed to post comment. Please try again.")
+        }
+    }
 }
-
-

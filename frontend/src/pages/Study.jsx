@@ -1,19 +1,41 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../contexts/AuthContext'
+import { fetchStudyTips, fetchEducationalContent, generateAIInsight } from '../services/apiService'
+import { useNavigate } from 'react-router-dom'
+import './DomainPages.css'
 
 export default function Study() {
     const { getComments, addComment } = useContext(AuthContext)
+    const navigate = useNavigate()
     const [comments, setComments] = useState([])
     const [newComment, setNewComment] = useState("")
-    const [focus, setFocus] = useState(0.78)
-    const [nextBreakIn, setNextBreakIn] = useState(25)
+    const [loading, setLoading] = useState(true)
+    const [studyTip, setStudyTip] = useState('')
+    const [educationalContent, setEducationalContent] = useState(null)
+    const [aiInsight, setAiInsight] = useState('')
 
     useEffect(() => {
-        const tick = setInterval(() => {
-            setFocus(prev => Math.max(0.4, Math.min(0.98, +(prev + (Math.random() * 0.08 - 0.04)).toFixed(2))))
-            setNextBreakIn(prev => prev > 0 ? prev - 1 : 25)
-        }, 1000)
-        return () => clearInterval(tick)
+        const loadStudyData = async () => {
+            setLoading(true)
+            try {
+                const [tip, content] = await Promise.all([
+                    fetchStudyTips(),
+                    fetchEducationalContent('learning')
+                ])
+                
+                setStudyTip(tip)
+                setEducationalContent(content)
+                setAiInsight(generateAIInsight('study', {}))
+            } catch (error) {
+                console.error('Error loading study data:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        loadStudyData()
+        const interval = setInterval(loadStudyData, 300000) // Update every 5 minutes
+        return () => clearInterval(interval)
     }, [])
 
     useEffect(() => {
@@ -26,79 +48,116 @@ export default function Study() {
         return () => clearInterval(id)
     }, [getComments])
 
+    const handleExpertChat = () => {
+        const randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        navigate(`/${randomCode}`);
+    }
+
     return (
-        <div className="pageContainer">
-            <h2>Study</h2>
-            <div className="statsGrid">
-                <div className="statCard">
-                    <h3>Focus Score</h3>
-                    <p className="statNumber">{Math.round(focus * 100)}%</p>
-                </div>
-                <div className="statCard">
-                    <h3>Next Break</h3>
-                    <p className="statNumber">{nextBreakIn}s</p>
-                </div>
-                <div className="statCard">
-                    <h3>Suggested Session</h3>
-                    <p className="statNumber">{focus > 0.8 ? 'Deep Work (45m)' : 'Light Review (20m)'}</p>
-                </div>
+        <div className="domain-container">
+            <div className="domain-header">
+                <h2>📚 Study & Learning</h2>
+                <p className="domain-subtitle">AI-powered learning strategies and educational resources</p>
             </div>
 
-            <div className="recentActivity" style={{ marginTop: '2rem' }}>
-                <h3>Tip</h3>
-                <div className="activityItem">
-                    <span className="activityIcon">🧠</span>
-                    <div className="activityDetails">
-                        <p>{focus > 0.8 ? 'Great focus — tackle the hardest topic now.' : 'Focus dipping — schedule a short, active break.'}</p>
-                        <span className="activityTime">Updates every second</span>
+            {loading ? (
+                <div className="loading-state">
+                    <div className="spinner"></div>
+                    <p>Loading learning resources...</p>
+                </div>
+            ) : (
+                <>
+                    <div className="stats-grid">
+                        <div className="stat-card study-card">
+                            <div className="stat-icon">🎯</div>
+                            <h3>Study Tip of the Day</h3>
+                            <p className="stat-content">{studyTip}</p>
+                            <p className="stat-update">Updated: {new Date().toLocaleTimeString()}</p>
+                        </div>
+                        <div className="stat-card study-card">
+                            <div className="stat-icon">📖</div>
+                            <h3>Learning Resource</h3>
+                            <p className="stat-content">
+                                {educationalContent?.summary || 'Explore new topics and expand your knowledge'}
+                            </p>
+                            {educationalContent?.url && (
+                                <a href={educationalContent.url} target="_blank" rel="noopener noreferrer" className="resource-link">
+                                    Learn More →
+                                </a>
+                            )}
+                        </div>
+                        <div className="stat-card study-card">
+                            <div className="stat-icon">⏱️</div>
+                            <h3>Pomodoro Timer</h3>
+                            <p className="stat-content">Use the 25-5 technique: Focus for 25 minutes, then take a 5-minute break</p>
+                            <p className="stat-update">Recommended Technique</p>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <div className="recentActivity" style={{ marginTop: '2rem' }}>
-                <h3>Community Thoughts</h3>
-                <div style={{ maxHeight: 260, overflowY: 'auto', marginBottom: '1rem' }}>
-                    {comments.length ? comments.map((c) => (
-                        <div key={c._id} className="activityItem">
-                            <span className="activityIcon">👤</span>
-                            <div className="activityDetails">
-                                <p>{c.text}</p>
-                                <span className="activityTime">by {c.userId}</span>
+                    <div className="ai-insight-card">
+                        <div className="ai-header">
+                            <span className="ai-icon">🤖</span>
+                            <h3>AI Learning Insight</h3>
+                        </div>
+                        <p className="ai-content">{aiInsight}</p>
+                        <p className="ai-timestamp">Generated at {new Date().toLocaleTimeString()}</p>
+                    </div>
+
+                    <div className="expert-chat-card">
+                        <div className="expert-header">
+                            <span className="expert-icon">👨‍🏫</span>
+                            <div>
+                                <h3>Need Learning Support?</h3>
+                                <p>Connect with an educational expert for personalized guidance</p>
                             </div>
                         </div>
-                    )) : <p>No comments yet</p>}
+                        <button className="expert-button" onClick={handleExpertChat}>
+                            <span>📹</span>
+                            Start Video Tutoring Session
+                        </button>
+                    </div>
+                </>
+            )}
+
+            <div className="community-section">
+                <h3>💬 Study Community</h3>
+                <div className="comments-display">
+                    {comments.length ? comments.map((c) => (
+                        <div key={c._id} className="comment-item">
+                            <span className="comment-icon">👤</span>
+                            <div className="comment-content">
+                                <p>{c.text}</p>
+                                <span className="comment-author">by {c.userId}</span>
+                            </div>
+                        </div>
+                    )) : <p className="no-comments">No discussions yet. Share your learning experience!</p>}
                 </div>
                 {localStorage.getItem("token") ? (
-                    <div className="inputGroup">
-                        <input className="authInput" placeholder="Share a thought..." value={newComment} onChange={(e) => setNewComment(e.target.value)} />
-                        <button className="primaryButton" onClick={async () => {
-                            try {
-                                await addComment('study', newComment)
-                                setNewComment('')
-                                const list = await getComments('study')
-                                setComments(list)
-                            } catch (err) {
-                                console.error("Error posting comment:", err)
-                                alert("Failed to post comment. Please try again.")
-                            }
-                        }}>Post</button>
+                    <div className="comment-input-group">
+                        <input 
+                            className="comment-input" 
+                            placeholder="Share a study tip or ask a question..." 
+                            value={newComment} 
+                            onChange={(e) => setNewComment(e.target.value)}
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter' && newComment.trim()) {
+                                    handlePostComment()
+                                }
+                            }}
+                        />
+                        <button className="post-button" onClick={handlePostComment} disabled={!newComment.trim()}>
+                            Post
+                        </button>
                     </div>
                 ) : (
-                    <div style={{ 
-                        padding: '1rem', 
-                        background: '#f0f0f0', 
-                        borderRadius: '8px', 
-                        textAlign: 'center',
-                        border: '2px dashed #ccc'
-                    }}>
-                        <p style={{ marginBottom: '0.5rem', color: '#666' }}>You need to be logged in to comment</p>
+                    <div className="login-prompt">
+                        <p>You need to be logged in to share insights</p>
                         <button 
-                            className="primaryButton" 
+                            className="login-button" 
                             onClick={() => {
                                 localStorage.setItem('postLoginRedirect', `/#study`)
                                 window.location.href = '/auth'
                             }}
-                            style={{ marginTop: '0.5rem' }}
                         >
                             Login to Comment
                         </button>
@@ -107,6 +166,17 @@ export default function Study() {
             </div>
         </div>
     )
+
+    async function handlePostComment() {
+        if (!newComment.trim()) return
+        try {
+            await addComment('study', newComment)
+            setNewComment('')
+            const list = await getComments('study')
+            setComments(list)
+        } catch (err) {
+            console.error("Error posting comment:", err)
+            alert("Failed to post comment. Please try again.")
+        }
+    }
 }
-
-

@@ -13,6 +13,24 @@ import Settings from './Settings'
 export default function LandingPage() {
     const [activePage, setActivePage] = useState('healthcare')
     const navigate = useNavigate()
+    const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+    // Check if user is logged in
+    useEffect(() => {
+        const checkAuth = () => {
+            setIsLoggedIn(!!localStorage.getItem("token"))
+        }
+        checkAuth()
+        // Listen for storage changes (logout/login from other tabs)
+        window.addEventListener('storage', checkAuth)
+        return () => window.removeEventListener('storage', checkAuth)
+    }, [])
+
+    const handleLogout = () => {
+        localStorage.removeItem("token")
+        setIsLoggedIn(false)
+        navigate("/auth")
+    }
 
     const sidebarOptions = [
         { id: 'healthcare', label: 'Healthcare', icon: '🩺' },
@@ -64,9 +82,20 @@ export default function LandingPage() {
                 </div>
                 <div className='navlist'>
                     <p onClick={() => navigate("/aljk23")}>Join as Guest</p>
-                    <div className="btn btn-danger" onClick={() => navigate("/auth")} role='button'>
-                        Login
-                    </div>
+                    {isLoggedIn ? (
+                        <>
+                            <div className="btn btn-primary" onClick={() => navigate("/home")} role='button'>
+                                Home
+                            </div>
+                            <div className="btn btn-danger" onClick={handleLogout} role='button'>
+                                Logout
+                            </div>
+                        </>
+                    ) : (
+                        <div className="btn btn-danger" onClick={() => navigate("/auth")} role='button'>
+                            Login
+                        </div>
+                    )}
                 </div>
             </nav>
 

@@ -1046,6 +1046,13 @@
   justify-content: center;
 }
 
+.videoChatButton {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  width: 100%;
+  justify-content: center;
+}
+
 .actionButton:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);

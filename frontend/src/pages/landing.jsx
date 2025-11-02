@@ -104,7 +104,8 @@ export default function LandingPage() {
                 {/* Sidebar */}
                 <div className="sidebar">
                     <div className="sidebarHeader">
-                        <h3>Menu</h3>
+                        <h3>🤖 AI Domains</h3>
+                        <p style={{fontSize: '0.85rem', opacity: 0.8, marginTop: '0.5rem'}}>Real-time insights & expert support</p>
                     </div>
                     <div className="sidebarOptions">
                         {sidebarOptions.map((option) => (

@@ -36,8 +36,8 @@ export const fetchStockData = async () => {
     try {
         // Using Alpha Vantage free tier (demo API key - limited requests)
         // Note: In production, you'd want to use your own API key
-        const niftyResponse = await fetch('https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=NIFTY.BSE&apikey=demo');
-        const niftyData = await niftyResponse.json();
+        // const niftyResponse = await fetch('https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=NIFTY.BSE&apikey=demo');
+        // const niftyData = await niftyResponse.json(); // Commented out as not used
         
         // Fallback: Using a public financial API or calculated values
         // Since Alpha Vantage demo has limits, we'll use a proxy or alternative
@@ -104,11 +104,91 @@ export const fetchWeatherData = async (city = 'Mumbai') => {
 };
 
 // Healthcare - Wellness tips and health data
+export const fetchLiveHealthMetrics = async () => {
+    try {
+        // Simulate real-time health metrics with realistic data
+        // In production, this would connect to actual health APIs or IoT devices
+        const metrics = {
+            heartRate: Math.round(Math.random() * 20 + 70), // 70-90 bpm
+            bloodPressure: {
+                systolic: Math.round(Math.random() * 20 + 120), // 120-140
+                diastolic: Math.round(Math.random() * 10 + 80)  // 80-90
+            },
+            oxygenSaturation: Math.round(Math.random() * 3 + 97), // 97-100%
+            bodyTemperature: (Math.random() * 1 + 36.5).toFixed(1), // 36.5-37.5°C
+            stepsToday: Math.round(Math.random() * 5000 + 5000), // 5000-10000
+            sleepHours: (Math.random() * 2 + 6).toFixed(1), // 6-8 hours
+            lastUpdated: new Date().toISOString()
+        };
+        
+        // Add health status based on metrics
+        metrics.healthStatus = getHealthStatus(metrics);
+        
+        return metrics;
+    } catch (error) {
+        console.error('Error fetching health metrics:', error);
+        return {
+            heartRate: 75,
+            bloodPressure: { systolic: 120, diastolic: 80 },
+            oxygenSaturation: 98,
+            bodyTemperature: 37.0,
+            stepsToday: 7500,
+            sleepHours: 7.5,
+            healthStatus: 'Good',
+            lastUpdated: new Date().toISOString()
+        };
+    }
+};
+
+export const fetchMedicationReminders = async () => {
+    try {
+        // Simulate medication reminders
+        const medications = [
+            {
+                name: 'Vitamin D3',
+                dosage: '1000 IU',
+                time: '08:00',
+                frequency: 'Daily',
+                taken: false,
+                nextDose: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+            },
+            {
+                name: 'Omega-3',
+                dosage: '500mg',
+                time: '12:00',
+                frequency: 'Daily',
+                taken: true,
+                nextDose: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+            },
+            {
+                name: 'Multivitamin',
+                dosage: '1 tablet',
+                time: '20:00',
+                frequency: 'Daily',
+                taken: false,
+                nextDose: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+            }
+        ];
+        
+        // Randomly update taken status for realism
+        medications.forEach(med => {
+            if (Math.random() > 0.7) {
+                med.taken = !med.taken;
+            }
+        });
+        
+        return medications;
+    } catch (error) {
+        console.error('Error fetching medication reminders:', error);
+        return [];
+    }
+};
+
 export const fetchHealthTips = async () => {
     try {
         // Using a public health API or news API for health tips
-        const response = await fetch('https://api.quotable.io/quotes?tags=health&limit=5');
-        const data = await response.json();
+        // const response = await fetch('https://api.quotable.io/quotes?tags=health&limit=5'); // Commented out as not used
+        // const data = await response.json(); // Commented out as not used
         
         const tips = [
             'Stay hydrated - drink at least 8 glasses of water daily',
@@ -208,6 +288,37 @@ export const fetchTravelInfo = async (destination = 'India') => {
 };
 
 // AI Insights Generator (simulated)
+// Helper function to determine health status based on metrics
+const getHealthStatus = (metrics) => {
+    let score = 0;
+    
+    // Heart rate (60-100 is normal)
+    if (metrics.heartRate >= 60 && metrics.heartRate <= 100) score += 1;
+    
+    // Blood pressure (normal: <120/80)
+    if (metrics.bloodPressure.systolic < 120 && metrics.bloodPressure.diastolic < 80) score += 1;
+    else if (metrics.bloodPressure.systolic < 140 && metrics.bloodPressure.diastolic < 90) score += 0.5;
+    
+    // Oxygen saturation (normal: 95-100%)
+    if (metrics.oxygenSaturation >= 95) score += 1;
+    
+    // Body temperature (normal: 36.1-37.2°C)
+    if (metrics.bodyTemperature >= 36.1 && metrics.bodyTemperature <= 37.2) score += 1;
+    
+    // Steps (goal: 10,000 steps)
+    if (metrics.stepsToday >= 10000) score += 1;
+    else if (metrics.stepsToday >= 5000) score += 0.5;
+    
+    // Sleep (7-9 hours recommended)
+    if (metrics.sleepHours >= 7 && metrics.sleepHours <= 9) score += 1;
+    else if (metrics.sleepHours >= 6) score += 0.5;
+    
+    if (score >= 5) return 'Excellent';
+    if (score >= 3.5) return 'Good';
+    if (score >= 2) return 'Fair';
+    return 'Needs Attention';
+};
+
 export const generateAIInsight = (domain, data) => {
     const insights = {
         finance: (marketData) => {

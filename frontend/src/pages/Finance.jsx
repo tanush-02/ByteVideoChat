@@ -17,6 +17,101 @@ export default function Finance() {
         lastUpdated: null
     })
     const [aiInsight, setAiInsight] = useState('')
+    
+    // SIP Calculator states
+    const [sipAmount, setSipAmount] = useState(5000)
+    const [sipDuration, setSipDuration] = useState(10)
+    const [expectedReturn, setExpectedReturn] = useState(12)
+    const [sipResults, setSipResults] = useState({
+        totalInvestment: 0,
+        estimatedReturns: 0,
+        maturityValue: 0
+    })
+
+    // Investment Portfolio states
+    const [activeTab, setActiveTab] = useState('current')
+    const [currentInvestments, setCurrentInvestments] = useState([
+        {
+            id: 1,
+            name: 'Reliance Industries',
+            type: 'Stocks',
+            amount: 50000,
+            currentValue: 57500,
+            returns: 15.0,
+            quantity: 100,
+            buyPrice: 500
+        },
+        {
+            id: 2,
+            name: 'HDFC Index Fund',
+            type: 'Mutual Funds',
+            amount: 25000,
+            currentValue: 28250,
+            returns: 13.0,
+            quantity: 250,
+            buyPrice: 100
+        },
+        {
+            id: 3,
+            name: 'Tata Consultancy Services',
+            type: 'Stocks',
+            amount: 30000,
+            currentValue: 28500,
+            returns: -5.0,
+            quantity: 50,
+            buyPrice: 600
+        }
+    ])
+
+    const [investmentHistory, setInvestmentHistory] = useState([
+        {
+            id: 1,
+            name: 'Reliance Industries',
+            type: 'BUY',
+            amount: 50000,
+            quantity: 100,
+            price: 500,
+            date: '2024-01-15',
+            profit: null
+        },
+        {
+            id: 2,
+            name: 'HDFC Index Fund',
+            type: 'BUY',
+            amount: 25000,
+            quantity: 250,
+            price: 100,
+            date: '2024-02-01',
+            profit: null
+        },
+        {
+            id: 3,
+            name: 'Infosys Limited',
+            type: 'SELL',
+            amount: 35000,
+            quantity: 50,
+            price: 700,
+            date: '2024-03-10',
+            profit: 5000
+        },
+        {
+            id: 4,
+            name: 'Tata Consultancy Services',
+            type: 'BUY',
+            amount: 30000,
+            quantity: 50,
+            price: 600,
+            date: '2024-03-20',
+            profit: null
+        }
+    ])
+
+    const [portfolioSummary, setPortfolioSummary] = useState({
+        totalInvested: 105000,
+        totalCurrent: 114250,
+        totalReturns: 9250,
+        totalReturnsPercent: 8.81
+    })
 
     useEffect(() => {
         const loadMarketData = async () => {
@@ -72,6 +167,27 @@ export default function Finance() {
         navigate(`/${randomCode}`);
     }
 
+    // SIP Calculator functions
+    const calculateSIP = () => {
+        const monthlyReturn = expectedReturn / 12 / 100;
+        const totalMonths = sipDuration * 12;
+        
+        // Future Value of SIP formula: FV = P * [((1 + r)^n - 1) / r] * (1 + r)
+        const maturityValue = sipAmount * (Math.pow(1 + monthlyReturn, totalMonths) - 1) / monthlyReturn * (1 + monthlyReturn);
+        const totalInvestment = sipAmount * totalMonths;
+        const estimatedReturns = maturityValue - totalInvestment;
+        
+        setSipResults({
+            totalInvestment: Math.round(totalInvestment),
+            estimatedReturns: Math.round(estimatedReturns),
+            maturityValue: Math.round(maturityValue)
+        });
+    }
+
+    useEffect(() => {
+        calculateSIP();
+    }, [sipAmount, sipDuration, expectedReturn])
+
     return (
         <div className="domain-container">
             <div className="domain-header">
@@ -113,6 +229,270 @@ export default function Finance() {
                             <p className="stat-number">{market.usdInr}</p>
                             {changeChip(market.usdInr, 83.1)}
                             <p className="stat-update">Updated: {market.lastUpdated?.toLocaleTimeString()}</p>
+                        </div>
+                    </div>
+
+                    <div className="sip-calculator-card">
+                        <div className="sip-header">
+                            <span className="sip-icon">💰</span>
+                            <h3>SIP Calculator</h3>
+                        </div>
+                        <div className="sip-inputs">
+                            <div className="input-group">
+                                <label>Monthly Investment (₹)</label>
+                                <input
+                                    type="number"
+                                    value={sipAmount}
+                                    onChange={(e) => setSipAmount(Number(e.target.value))}
+                                    min="100"
+                                    max="100000"
+                                    step="500"
+                                />
+                                <div className="input-range">
+                                    <span>₹100</span>
+                                    <input
+                                        type="range"
+                                        value={sipAmount}
+                                        onChange={(e) => setSipAmount(Number(e.target.value))}
+                                        min="100"
+                                        max="100000"
+                                        step="500"
+                                    />
+                                    <span>₹1L</span>
+                                </div>
+                            </div>
+                            
+                            <div className="input-group">
+                                <label>Investment Duration (Years)</label>
+                                <input
+                                    type="number"
+                                    value={sipDuration}
+                                    onChange={(e) => setSipDuration(Number(e.target.value))}
+                                    min="1"
+                                    max="30"
+                                />
+                                <div className="input-range">
+                                    <span>1Y</span>
+                                    <input
+                                        type="range"
+                                        value={sipDuration}
+                                        onChange={(e) => setSipDuration(Number(e.target.value))}
+                                        min="1"
+                                        max="30"
+                                    />
+                                    <span>30Y</span>
+                                </div>
+                            </div>
+                            
+                            <div className="input-group">
+                                <label>Expected Return Rate (%)</label>
+                                <input
+                                    type="number"
+                                    value={expectedReturn}
+                                    onChange={(e) => setExpectedReturn(Number(e.target.value))}
+                                    min="5"
+                                    max="25"
+                                    step="0.5"
+                                />
+                                <div className="input-range">
+                                    <span>5%</span>
+                                    <input
+                                        type="range"
+                                        value={expectedReturn}
+                                        onChange={(e) => setExpectedReturn(Number(e.target.value))}
+                                        min="5"
+                                        max="25"
+                                        step="0.5"
+                                    />
+                                    <span>25%</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="sip-results">
+                            <div className="result-item">
+                                <span className="result-label">Total Investment</span>
+                                <span className="result-value">₹{sipResults.totalInvestment.toLocaleString()}</span>
+                            </div>
+                            <div className="result-item">
+                                <span className="result-label">Estimated Returns</span>
+                                <span className="result-value returns">₹{sipResults.estimatedReturns.toLocaleString()}</span>
+                            </div>
+                            <div className="result-item total">
+                                <span className="result-label">Maturity Value</span>
+                                <span className="result-value">₹{sipResults.maturityValue.toLocaleString()}</span>
+                            </div>
+                        </div>
+                        
+                        <div className="sip-chart">
+                            <div className="chart-bar">
+                                <div 
+                                    className="investment-bar" 
+                                    style={{width: `${(sipResults.totalInvestment / sipResults.maturityValue) * 100}%`}}
+                                ></div>
+                                <span>Investment: ₹{sipResults.totalInvestment.toLocaleString()}</span>
+                            </div>
+                            <div className="chart-bar">
+                                <div 
+                                    className="returns-bar" 
+                                    style={{width: `${(sipResults.estimatedReturns / sipResults.maturityValue) * 100}%`}}
+                                ></div>
+                                <span>Returns: ₹{sipResults.estimatedReturns.toLocaleString()}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="investment-portfolio-card">
+                        <div className="portfolio-header">
+                            <span className="portfolio-icon">📊</span>
+                            <h3>My Investments</h3>
+                        </div>
+                        
+                        <div className="portfolio-tabs">
+                            <button 
+                                className={`tab-button ${activeTab === 'current' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('current')}
+                            >
+                                Current Investments
+                            </button>
+                            <button 
+                                className={`tab-button ${activeTab === 'history' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('history')}
+                            >
+                                Investment History
+                            </button>
+                        </div>
+
+                        {activeTab === 'current' ? (
+                            <div className="current-investments">
+                                {currentInvestments.length > 0 ? (
+                                    <div className="investments-grid">
+                                        {currentInvestments.map((investment) => (
+                                            <div key={investment.id} className="investment-card">
+                                                <div className="investment-header">
+                                                    <div className="investment-info">
+                                                        <h4>{investment.name}</h4>
+                                                        <span className={`investment-type ${investment.type.toLowerCase()}`}>
+                                                            {investment.type}
+                                                        </span>
+                                                    </div>
+                                                    <div className={`investment-status ${investment.currentValue >= investment.amount ? 'profit' : 'loss'}`}>
+                                                        {investment.currentValue >= investment.amount ? '📈' : '📉'}
+                                                    </div>
+                                                </div>
+                                                <div className="investment-details">
+                                                    <div className="detail-row">
+                                                        <span>Invested Amount</span>
+                                                        <span className="amount">₹{investment.amount.toLocaleString()}</span>
+                                                    </div>
+                                                    <div className="detail-row">
+                                                        <span>Current Value</span>
+                                                        <span className={`amount ${investment.currentValue >= investment.amount ? 'profit' : 'loss'}`}>
+                                                            ₹{investment.currentValue.toLocaleString()}
+                                                        </span>
+                                                    </div>
+                                                    <div className="detail-row">
+                                                        <span>Gain/Loss</span>
+                                                        <span className={`amount ${investment.currentValue >= investment.amount ? 'profit' : 'loss'}`}>
+                                                            ₹{Math.abs(investment.currentValue - investment.amount).toLocaleString()}
+                                                        </span>
+                                                    </div>
+                                                    <div className="detail-row">
+                                                        <span>Returns</span>
+                                                        <span className={`amount ${investment.returns >= 0 ? 'profit' : 'loss'}`}>
+                                                            {investment.returns >= 0 ? '+' : ''}{investment.returns.toFixed(2)}%
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className="investment-progress">
+                                                    <div className="progress-bar">
+                                                        <div 
+                                                            className={`progress-fill ${investment.returns >= 0 ? 'profit' : 'loss'}`}
+                                                            style={{width: `${Math.min(Math.abs(investment.returns) * 2, 100)}%`}}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+                                                <div className="investment-actions">
+                                                    <button className="action-button view">View Details</button>
+                                                    <button className="action-button sell">Sell</button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="no-investments">
+                                        <span className="no-investments-icon">📈</span>
+                                        <h4>No Current Investments</h4>
+                                        <p>Start building your investment portfolio today!</p>
+                                        <button className="add-investment-btn">Add Investment</button>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="investment-history">
+                                {investmentHistory.length > 0 ? (
+                                    <div className="history-list">
+                                        {investmentHistory.map((transaction) => (
+                                            <div key={transaction.id} className={`history-item ${transaction.type.toLowerCase()}`}>
+                                                <div className="history-icon">
+                                                    {transaction.type === 'BUY' ? '🟢' : '🔴'}
+                                                </div>
+                                                <div className="history-details">
+                                                    <div className="history-header">
+                                                        <h4>{transaction.name}</h4>
+                                                        <span className={`history-type ${transaction.type.toLowerCase()}`}>
+                                                            {transaction.type}
+                                                        </span>
+                                                    </div>
+                                                    <div className="history-info">
+                                                        <span className="history-date">{transaction.date}</span>
+                                                        <span className="history-amount">₹{transaction.amount.toLocaleString()}</span>
+                                                    </div>
+                                                    <div className="history-stats">
+                                                        <span className="history-quantity">{transaction.quantity} units</span>
+                                                        <span className="history-price">@ ₹{transaction.price.toFixed(2)}</span>
+                                                    </div>
+                                                </div>
+                                                <div className="history-status">
+                                                    {transaction.type === 'SELL' && transaction.profit !== undefined && (
+                                                        <span className={`profit-loss ${transaction.profit >= 0 ? 'profit' : 'loss'}`}>
+                                                            {transaction.profit >= 0 ? '+' : ''}₹{transaction.profit.toLocaleString()}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="no-history">
+                                        <span className="no-history-icon">📊</span>
+                                        <h4>No Investment History</h4>
+                                        <p>Your investment transactions will appear here</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        
+                        <div className="portfolio-summary">
+                            <div className="summary-card">
+                                <h4>Portfolio Summary</h4>
+                                <div className="summary-item">
+                                    <span>Total Invested</span>
+                                    <span className="summary-value">₹{portfolioSummary.totalInvested.toLocaleString()}</span>
+                                </div>
+                                <div className="summary-item">
+                                    <span>Current Value</span>
+                                    <span className={`summary-value ${portfolioSummary.totalCurrent >= portfolioSummary.totalInvested ? 'profit' : 'loss'}`}>
+                                        ₹{portfolioSummary.totalCurrent.toLocaleString()}
+                                    </span>
+                                </div>
+                                <div className="summary-item">
+                                    <span>Total Returns</span>
+                                    <span className={`summary-value ${portfolioSummary.totalReturns >= 0 ? 'profit' : 'loss'}`}>
+                                        ₹{portfolioSummary.totalReturns.toLocaleString()} ({portfolioSummary.totalReturnsPercent.toFixed(2)}%)
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

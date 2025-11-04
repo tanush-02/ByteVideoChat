@@ -398,6 +398,242 @@
     cursor: pointer;
 }
 
+/* Healthcare Live Metrics */
+.healthMetrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.metricCard {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 1.5rem;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.metricCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+
+.metricCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(34, 197, 94, 0.2);
+}
+
+.metricIcon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.metricValue {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+    margin: 0.5rem 0;
+}
+
+.metricLabel {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.metricStatus {
+    font-size: 0.85rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 0.5rem;
+}
+
+.metricStatus:contains('Normal'), .metricStatus:contains('Excellent'), .metricStatus:contains('Good'), .metricStatus:contains('Goal Met!') {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.metricStatus:contains('Check Required'), .metricStatus:contains('Monitor'), .metricStatus:contains('Low'), .metricStatus:contains('Needs Attention') {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.overallStatus {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.1));
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 1.5rem;
+    text-align: center;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    margin-top: 1rem;
+}
+
+.overallStatus h3 {
+    color: white;
+    margin: 0 0 1rem 0;
+    font-size: 1.3rem;
+}
+
+.statusIndicator {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin: 0 auto;
+    animation: pulse 2s infinite;
+}
+
+.statusIndicator.excellent {
+    background: #22c55e;
+}
+
+.statusIndicator.good {
+    background: #eab308;
+}
+
+.statusIndicator.fair {
+    background: #f97316;
+}
+
+.statusIndicator.needsattention {
+    background: #ef4444;
+}
+
+/* Medication Reminders */
+.medicationSection {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.medicationSection h3 {
+    color: white;
+    margin: 0 0 1rem 0;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.medicationList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.medicationItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.medicationItem:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(5px);
+}
+
+.medicationItem.taken {
+    opacity: 0.6;
+    background: rgba(34, 197, 94, 0.1);
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.medicationItem.overdue {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+    animation: pulse 1s infinite;
+}
+
+.medicationInfo {
+    flex: 1;
+}
+
+.medicationName {
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.medicationDosage {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.medicationTime {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+}
+
+.takeButton {
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.takeButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.takeButton.takenButton {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+}
+
+.nextMedication {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(34, 197, 94, 0.1);
+    border-radius: 10px;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #22c55e;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.contentSection {
+    margin: 2rem 0;
+}
+
+.contentSection h2 {
+    color: white;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
 .city-select option {
     background: #667eea;
     color: white;
@@ -626,5 +862,693 @@
 
 .travel-card::before {
     background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+/* SIP Calculator Styles */
+.sip-calculator-card {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.1));
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    margin: 2rem 0;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.sip-calculator-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+
+.sip-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.sip-icon {
+    font-size: 2rem;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.sip-header h3 {
+    color: white;
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.sip-inputs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.input-group label {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.input-group input[type="number"] {
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+}
+
+.input-group input[type="number"]:focus {
+    outline: none;
+    border-color: rgba(34, 197, 94, 0.6);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.input-range {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.input-range span {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.8rem;
+    min-width: 40px;
+}
+
+.input-range input[type="range"] {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.2);
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.input-range input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(34, 197, 94, 0.3);
+}
+
+.input-range input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 6px rgba(34, 197, 94, 0.3);
+}
+
+.sip-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.result-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+    padding: 1rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.result-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.result-item.total {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(22, 163, 74, 0.2));
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.result-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.result-value {
+    color: white;
+    font-size: 1.3rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff, rgba(255, 255, 255, 0.8));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.result-value.returns {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.sip-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chart-bar {
+    position: relative;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.chart-bar .investment-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(22, 163, 74, 0.3));
+    border-radius: 12px;
+    transition: width 0.5s ease;
+}
+
+.chart-bar .returns-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.6), rgba(22, 163, 74, 0.6));
+    border-radius: 12px;
+    transition: width 0.5s ease;
+}
+
+.chart-bar span {
+    position: relative;
+    z-index: 1;
+    color: white;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+/* Investment Portfolio Styles */
+.investment-portfolio-card {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    margin: 2rem 0;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.investment-portfolio-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6, #2563eb);
+}
+
+.portfolio-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.portfolio-icon {
+    font-size: 2rem;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.portfolio-header h3 {
+    color: white;
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.portfolio-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.tab-button {
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.tab-button.active {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.investments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.investment-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.investment-card:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.investment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.investment-info h4 {
+    color: white;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.investment-type {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.investment-type.stocks {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.investment-type.mutual-funds {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.investment-status {
+    font-size: 1.5rem;
+}
+
+.investment-status.profit {
+    color: #22c55e;
+}
+
+.investment-status.loss {
+    color: #ef4444;
+}
+
+.investment-details {
+    margin-bottom: 1rem;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-row span:first-child {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}
+
+.detail-row .amount {
+    font-weight: 600;
+    color: white;
+}
+
+.detail-row .amount.profit {
+    color: #22c55e;
+}
+
+.detail-row .amount.loss {
+    color: #ef4444;
+}
+
+.investment-progress {
+    margin-bottom: 1rem;
+}
+
+.progress-bar {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.progress-fill.profit {
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+
+.progress-fill.loss {
+    background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.investment-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.action-button {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.action-button.view {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.action-button.view:hover {
+    background: rgba(59, 130, 246, 0.3);
+}
+
+.action-button.sell {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.action-button.sell:hover {
+    background: rgba(239, 68, 68, 0.3);
+}
+
+.no-investments,
+.no-history {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.no-investments-icon,
+.no-history-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.no-investments h4,
+.no-history h4 {
+    color: white;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+}
+
+.add-investment-btn {
+    margin-top: 1rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.add-investment-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.history-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(5px);
+}
+
+.history-item.buy {
+    border-left: 4px solid #22c55e;
+}
+
+.history-item.sell {
+    border-left: 4px solid #ef4444;
+}
+
+.history-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.history-details {
+    flex: 1;
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.history-header h4 {
+    color: white;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.history-type {
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.history-type.buy {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+}
+
+.history-type.sell {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.history-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.history-date {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+}
+
+.history-amount {
+    color: white;
+    font-weight: 600;
+}
+
+.history-stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+}
+
+.history-quantity,
+.history-price {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.history-status {
+    text-align: right;
+}
+
+.profit-loss {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.profit-loss.profit {
+    color: #22c55e;
+}
+
+.profit-loss.loss {
+    color: #ef4444;
+}
+
+.portfolio-summary {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.summary-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.summary-card h4 {
+    color: white;
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.summary-item:last-child {
+    border-bottom: none;
+}
+
+.summary-item span:first-child {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.summary-value {
+    font-weight: 600;
+    color: white;
+}
+
+.summary-value.profit {
+    color: #22c55e;
+}
+
+.summary-value.loss {
+    color: #ef4444;
+}
+
+@media (max-width: 768px) {
+    .sip-inputs {
+        grid-template-columns: 1fr;
+    }
+    
+    .sip-results {
+        grid-template-columns: 1fr;
+    }
+    
+    .sip-calculator-card {
+        padding: 1.5rem;
+    }
+    
+    .input-range {
+        gap: 0.5rem;
+    }
+    
+    .input-range span {
+        min-width: 30px;
+        font-size: 0.75rem;
+    }
 }
 

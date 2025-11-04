@@ -47,6 +47,8 @@ export default function VideoMeetComponent() {
     let [messages, setMessages] = useState([])
     let [message, setMessage] = useState("");
     let [newMessages, setNewMessages] = useState(0);
+    let [isTyping, setIsTyping] = useState(false);
+    let [typingUsers, setTypingUsers] = useState([]);
 
     let [askForUsername, setAskForUsername] = useState(true);
     let [username, setUsername] = useState("");
@@ -184,8 +186,14 @@ export default function VideoMeetComponent() {
 
         stream.getTracks().forEach(track => {
             track.onended = async () => {
-                setVideo(false);
-                setAudio(false);
+                console.log("Track ended:", track.kind);
+                
+                // Only disable the specific track type that ended
+                if (track.kind === 'video') {
+                    setVideo(false);
+                } else if (track.kind === 'audio') {
+                    setAudio(false);
+                }
 
                 try {
                     let tracks = localVideoref.current?.srcObject?.getTracks() || [];
@@ -200,33 +208,46 @@ export default function VideoMeetComponent() {
                     localVideoref.current.srcObject = window.localStream;
                 }
 
-                // Update peer connections
-                for (let id in connections) {
-                    try {
-                        const senders = connections[id].getSenders();
-                        senders.forEach(sender => {
-                            if (sender.track) {
-                                connections[id].removeTrack(sender);
-                            }
-                        });
-                        blackSilence.getTracks().forEach(track => {
-                            connections[id].addTrack(track, blackSilence);
-                        });
-
-                        const description = await connections[id].createOffer();
-                        await connections[id].setLocalDescription(description);
-                        socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
-                    } catch (e) {
-                        console.error("Error updating connection on track end:", e);
-                    }
-                }
+                // Update peer connections using the helper function
+                await updatePeerConnections(blackSilence);
             };
         });
     }
 
+    let updatePeerConnections = async (stream) => {
+        for (let id in connections) {
+            if (id === socketIdRef.current) continue;
+            try {
+                const senders = connections[id].getSenders();
+                
+                // Remove existing tracks
+                for (let sender of senders) {
+                    if (sender.track) {
+                        connections[id].removeTrack(sender);
+                    }
+                }
+
+                // Add new tracks from the stream
+                stream.getTracks().forEach(track => {
+                    connections[id].addTrack(track, stream);
+                });
+
+                // Create and send new offer
+                const description = await connections[id].createOffer();
+                await connections[id].setLocalDescription(description);
+                socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
+            } catch (e) {
+                console.error("Error updating connection:", e);
+            }
+        }
+    }
+
     let getUserMedia = () => {
         if ((video && videoAvailable) || (audio && audioAvailable)) {
-            navigator.mediaDevices.getUserMedia({ video: video && videoAvailable, audio: audio && audioAvailable })
+            navigator.mediaDevices.getUserMedia({ 
+                video: video && videoAvailable, 
+                audio: audio && audioAvailable 
+            })
                 .then(getUserMediaSuccess)
                 .catch((e) => {
                     console.error("Error getting user media:", e);
@@ -246,29 +267,8 @@ export default function VideoMeetComponent() {
                     localVideoref.current.srcObject = window.localStream;
                 }
 
-                // Update all connections
-                for (let id in connections) {
-                    if (id === socketIdRef.current) continue;
-                    try {
-                        const senders = connections[id].getSenders();
-                        senders.forEach(sender => {
-                            if (sender.track) {
-                                connections[id].removeTrack(sender);
-                            }
-                        });
-                        blackSilence.getTracks().forEach(track => {
-                            connections[id].addTrack(track, blackSilence);
-                        });
-
-                        connections[id].createOffer().then((description) => {
-                            connections[id].setLocalDescription(description).then(() => {
-                                socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
-                            }).catch(e => console.error("Error setting local description:", e));
-                        }).catch(e => console.error("Error creating offer:", e));
-                    } catch (e) {
-                        console.error("Error updating connection:", e);
-                    }
-                }
+                // Update all connections using the new helper function
+                updatePeerConnections(blackSilence);
             } catch (e) {
                 console.error("Error handling media off:", e);
             }
@@ -290,28 +290,8 @@ export default function VideoMeetComponent() {
             localVideoref.current.srcObject = stream;
         }
 
-        for (let id in connections) {
-            if (id === socketIdRef.current) continue;
-
-            try {
-                const senders = connections[id].getSenders();
-                senders.forEach(sender => {
-                    if (sender.track) {
-                        connections[id].removeTrack(sender);
-                    }
-                });
-
-                stream.getTracks().forEach(track => {
-                    connections[id].addTrack(track, stream);
-                });
-
-                const description = await connections[id].createOffer();
-                await connections[id].setLocalDescription(description);
-                socketRef.current.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
-            } catch (e) {
-                console.error("Error updating connection with screen share:", e);
-            }
-        }
+        // Update peer connections using the helper function
+        await updatePeerConnections(stream);
 
         stream.getTracks().forEach(track => {
             track.onended = () => {
@@ -372,6 +352,20 @@ export default function VideoMeetComponent() {
             socketIdRef.current = socketRef.current.id;
 
             socketRef.current.on('chat-message', addMessage);
+
+            socketRef.current.on('user-typing', (username) => {
+                setTypingUsers(prev => {
+                    if (!prev.includes(username)) {
+                        return [...prev, username];
+                    }
+                    return prev;
+                });
+                
+                // Remove typing indicator after 2 seconds
+                setTimeout(() => {
+                    setTypingUsers(prev => prev.filter(user => user !== username));
+                }, 2000);
+            });
 
             socketRef.current.on('user-left', (id) => {
                 setVideos((videos) => videos.filter((video) => video.socketId !== id));
@@ -558,8 +552,23 @@ export default function VideoMeetComponent() {
     let sendMessage = (e) => {
         e?.preventDefault();
         if (message.trim() && socketRef.current && username) {
-            socketRef.current.emit('chat-message', message, username);
-            setMessage("");
+            try {
+                socketRef.current.emit('chat-message', message, username);
+                setMessage("");
+                setIsTyping(false);
+                
+                // Add a small confirmation feedback
+                setTimeout(() => {
+                    // Message sent successfully
+                }, 100);
+            } catch (error) {
+                console.error("Error sending message:", error);
+                alert("Failed to send message. Please try again.");
+            }
+        } else if (!socketRef.current) {
+            alert("Not connected to server. Please wait a moment and try again.");
+        } else if (!username) {
+            alert("Please enter a username first.");
         }
     }
 
@@ -575,6 +584,20 @@ export default function VideoMeetComponent() {
     const handleKeyPress = (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             sendMessage(e);
+        }
+    };
+
+    const handleMessageChange = (e) => {
+        setMessage(e.target.value);
+        
+        // Emit typing indicator
+        if (e.target.value.trim() && !isTyping) {
+            setIsTyping(true);
+            if (socketRef.current && username) {
+                socketRef.current.emit('typing', username);
+            }
+        } else if (!e.target.value.trim() && isTyping) {
+            setIsTyping(false);
         }
     };
 
@@ -661,7 +684,7 @@ export default function VideoMeetComponent() {
                                 <div className={styles.chattingArea}>
                                     <TextField 
                                         value={message} 
-                                        onChange={(e) => setMessage(e.target.value)}
+                                        onChange={handleMessageChange}
                                         onKeyPress={handleKeyPress}
                                         id="chat-input" 
                                         label="Type a message..." 
@@ -679,6 +702,17 @@ export default function VideoMeetComponent() {
                                         <SendIcon />
                                     </IconButton>
                                 </div>
+                                
+                                {typingUsers.length > 0 && (
+                                    <div className={styles.typingIndicator}>
+                                        <Typography variant="caption" color="textSecondary">
+                                            {typingUsers.length === 1 
+                                                ? `${typingUsers[0]} is typing...`
+                                                : `${typingUsers.length} people are typing...`
+                                            }
+                                        </Typography>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}
@@ -738,6 +772,16 @@ export default function VideoMeetComponent() {
                         muted 
                         playsInline
                     />
+                    
+                    {/* Status indicators for camera and microphone */}
+                    <div className={styles.videoStatusIndicator}>
+                        <div className={`${styles.statusIcon} ${video ? styles.cameraOn : styles.cameraOff}`}>
+                            {video ? '📹' : '📹'}
+                        </div>
+                        <div className={`${styles.statusIcon} ${audio ? styles.micOn : styles.micOff}`}>
+                            {audio ? '🎤' : '🎤'}
+                        </div>
+                    </div>
 
                     <div className={styles.conferenceView}>
                         {videos.length === 0 && (

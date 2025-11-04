@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import "../App.css"
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 // Import page components
 import Healthcare from './Healthcare'
@@ -9,6 +9,15 @@ import Study from './Study'
 import Travelling from './Travelling'
 import Meetings from './Meetings'
 import Settings from './Settings'
+
+const sidebarOptions = [
+    { id: 'healthcare', label: 'Healthcare', icon: '🩺' },
+    { id: 'finance', label: 'Finance', icon: '💹' },
+    { id: 'study', label: 'Study', icon: '📚' },
+    { id: 'travelling', label: 'Travelling', icon: '✈️' },
+     { id: 'meetings', label: 'Meetings', icon: '📞' },
+    { id: 'settings', label: 'Settings', icon: '⚙️' }
+]
 
 export default function LandingPage() {
     const [activePage, setActivePage] = useState('healthcare')
@@ -31,15 +40,6 @@ export default function LandingPage() {
         setIsLoggedIn(false)
         navigate("/auth")
     }
-
-    const sidebarOptions = [
-        { id: 'healthcare', label: 'Healthcare', icon: '🩺' },
-        { id: 'finance', label: 'Finance', icon: '💹' },
-        { id: 'study', label: 'Study', icon: '📚' },
-        { id: 'travelling', label: 'Travelling', icon: '✈️' },
-         { id: 'meetings', label: 'Meetings', icon: '📞' },
-        { id: 'settings', label: 'Settings', icon: '⚙️' }
-    ]
 
     // Sync active section with URL hash to support redirecting back after login
     useEffect(() => {
@@ -88,7 +88,7 @@ export default function LandingPage() {
                                 Home
                             </div>
                             <div className="btn btn-danger" onClick={handleLogout} role='button'>
-                                Logout
+                                Login
                             </div>
                         </>
                     ) : (

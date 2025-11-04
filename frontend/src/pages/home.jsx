@@ -55,7 +55,7 @@ function HomeComponent() {
                         onClick={handleLogout}
                     >
                         <span className="buttonIcon">🚪</span>
-                        <span>Logout</span>
+                        <span>Login</span>
                     </button>
                 </div>
             </nav>

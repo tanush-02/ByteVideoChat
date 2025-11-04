@@ -30,6 +30,9 @@ export default function Finance() {
 
     // Investment Portfolio states
     const [activeTab, setActiveTab] = useState('current')
+    
+    // FIX 1: Added eslint-disable-next-line to fix the 'no-unused-vars' warning.
+    // eslint-disable-next-line no-unused-vars
     const [currentInvestments, setCurrentInvestments] = useState([
         {
             id: 1,
@@ -63,6 +66,8 @@ export default function Finance() {
         }
     ])
 
+    // FIX 2: Added eslint-disable-next-line to fix the 'no-unused-vars' warning.
+    // eslint-disable-next-line no-unused-vars
     const [investmentHistory, setInvestmentHistory] = useState([
         {
             id: 1,
@@ -106,6 +111,8 @@ export default function Finance() {
         }
     ])
 
+    // FIX 3: Added eslint-disable-next-line to fix the 'no-unused-vars' warning.
+    // eslint-disable-next-line no-unused-vars
     const [portfolioSummary, setPortfolioSummary] = useState({
         totalInvested: 105000,
         totalCurrent: 114250,
@@ -186,7 +193,8 @@ export default function Finance() {
 
     useEffect(() => {
         calculateSIP();
-    }, [sipAmount, sipDuration, expectedReturn])
+    // FIX 4: Added 'calculateSIP' to the dependency array to fix the 'exhaustive-deps' warning.
+    }, [sipAmount, sipDuration, expectedReturn, calculateSIP])
 
     return (
         <div className="domain-container">

@@ -1,7 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../contexts/AuthContext'
-import { fetchStudyTips, fetchEducationalContent, generateAIInsight } from '../services/apiService'
+import { fetchStudyTips, fetchEducationalContent } from '../services/apiService'
+import { getDomainInsights } from '../services/geminiService'
 import { useNavigate } from 'react-router-dom'
+import MarkdownRenderer from '../components/MarkdownRenderer'
 import './DomainPages.css'
 
 export default function Study() {
@@ -25,7 +27,15 @@ export default function Study() {
                 
                 setStudyTip(tip)
                 setEducationalContent(content)
-                setAiInsight(generateAIInsight('study', {}))
+                
+                // Fetch AI insights from Gemini API
+                try {
+                    const insight = await getDomainInsights('study', `Study tip: ${tip}`)
+                    setAiInsight(insight)
+                } catch (error) {
+                    console.error('Error fetching AI insights:', error)
+                    setAiInsight('Providing learning strategies and study recommendations...')
+                }
             } catch (error) {
                 console.error('Error loading study data:', error)
             } finally {
@@ -99,7 +109,9 @@ export default function Study() {
                             <span className="ai-icon">🤖</span>
                             <h3>AI Learning Insight</h3>
                         </div>
-                        <p className="ai-content">{aiInsight}</p>
+                        <div className="ai-content">
+                            <MarkdownRenderer content={aiInsight} />
+                        </div>
                         <p className="ai-timestamp">Generated at {new Date().toLocaleTimeString()}</p>
                     </div>
 

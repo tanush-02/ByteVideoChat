@@ -1,7 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../contexts/AuthContext'
-import { fetchWeatherData, fetchTravelInfo, generateAIInsight } from '../services/apiService'
+import { fetchWeatherData, fetchTravelInfo } from '../services/apiService'
+import { getDomainInsights } from '../services/geminiService'
 import { useNavigate } from 'react-router-dom'
+import MarkdownRenderer from '../components/MarkdownRenderer'
 import './DomainPages.css'
 
 export default function Travelling() {
@@ -32,7 +34,15 @@ export default function Travelling() {
                 
                 setWeather(weatherData)
                 setTravelInfo(travelData)
-                setAiInsight(generateAIInsight('travel', weatherData))
+                
+                // Fetch AI insights from Gemini API (use 'travel' for backend)
+                try {
+                    const insight = await getDomainInsights('travelling', `Weather in ${city}: ${weatherData.temp}°C, ${weatherData.condition}, Wind: ${weatherData.windSpeed} km/h`)
+                    setAiInsight(insight)
+                } catch (error) {
+                    console.error('Error fetching AI insights:', error)
+                    setAiInsight('Providing travel recommendations and weather-based insights...')
+                }
             } catch (error) {
                 console.error('Error loading travel data:', error)
             } finally {
@@ -124,7 +134,9 @@ export default function Travelling() {
                             <span className="ai-icon">🤖</span>
                             <h3>AI Travel Recommendation</h3>
                         </div>
-                        <p className="ai-content">{aiInsight}</p>
+                        <div className="ai-content">
+                            <MarkdownRenderer content={aiInsight} />
+                        </div>
                         <p className="ai-timestamp">Generated at {new Date().toLocaleTimeString()}</p>
                     </div>
 

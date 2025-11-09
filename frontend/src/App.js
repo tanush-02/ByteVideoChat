@@ -7,6 +7,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import HomeComponent from './pages/home';
 import History from './pages/history';
 import VideoMeetComponent from './pages/VideoMeetComponent';
+import SentimentAnalysis from './pages/SentimentAnalysis';
 
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
 
             <Route path='/home' element={<HomeComponent />} />
             <Route path='/history' element={<History />} />
+            <Route path='/sentiment' element={<SentimentAnalysis />} />
             <Route path='/:url' element={<VideoMeetComponent />} />
           </Routes>
         </AuthProvider>

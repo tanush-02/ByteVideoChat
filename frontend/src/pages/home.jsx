@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useState, useEffect } from 'react'
 import withAuth from '../utils/withAuth'
 import { useNavigate } from 'react-router-dom'
 import "../App.css";
@@ -8,8 +8,61 @@ function HomeComponent() {
     let navigate = useNavigate();
     const [meetingCode, setMeetingCode] = useState("");
     const [isCreating, setIsCreating] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [aiInsights, setAiInsights] = useState({
+        mood: 'analyzing',
+        nextAction: 'Click to start analysis',
+        sentiment: 0,
+        recommendations: ['Open sentiment analysis for detailed insights']
+    });
 
     const {addToUserHistory} = useContext(AuthContext);
+
+    useEffect(() => {
+        // Get real sentiment data from localStorage or API
+        const getSentimentData = () => {
+            try {
+                const storedSentiment = localStorage.getItem('currentSentiment');
+                const storedScore = localStorage.getItem('sentimentScore');
+                
+                if (storedSentiment && storedScore) {
+                    const sentiment = JSON.parse(storedSentiment);
+                    const score = parseFloat(storedScore);
+                    
+                    setAiInsights({
+                        mood: sentiment === 'positive' ? 'productive' : sentiment === 'negative' ? 'needs attention' : 'neutral',
+                        sentiment: Math.round(Math.abs(score) * 100),
+                        nextAction: sentiment === 'positive' ? 'Great time for important tasks' : 
+                                   sentiment === 'negative' ? 'Consider taking a break' : 'Stay engaged',
+                        recommendations: [
+                            sentiment === 'positive' ? 'Capitalize on your positive energy' :
+                            sentiment === 'negative' ? 'Take a mindfulness break' :
+                            'Engage in mood-boosting activities',
+                            'Check detailed analysis in Sentiment page'
+                        ]
+                    });
+                }
+            } catch (error) {
+                console.log('No sentiment data available');
+            }
+        };
+
+        getSentimentData();
+        const interval = setInterval(getSentimentData, 5000);
+        return () => clearInterval(interval);
+    }, []);
+
+    // Handle keyboard navigation for sidebar
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if (event.key === 'Escape' && sidebarOpen) {
+                setSidebarOpen(false);
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [sidebarOpen]);
     
     let handleJoinVideoCall = async () => {
         if (!meetingCode.trim()) return;
@@ -30,6 +83,99 @@ function HomeComponent() {
 
     return (
         <div className="homeContainer">
+            {/* AI Insights Sidebar */}
+            <div 
+                className={`aiSidebar ${sidebarOpen ? 'open' : ''}`}
+                role="complementary"
+                aria-label="AI Insights Sidebar"
+                aria-hidden={!sidebarOpen}
+            >
+                <div className="sidebarHeader">
+                    <h3>🧠 AI Insights</h3>
+                    <button 
+                        className="closeSidebar"
+                        onClick={() => setSidebarOpen(false)}
+                        aria-label="Close AI Insights Sidebar"
+                        tabIndex={sidebarOpen ? 0 : -1}
+                    >
+                        ×
+                    </button>
+                </div>
+                
+                <div className="sidebarContent">
+                    <div className="insightCard">
+                        <h4>Your Current Mood</h4>
+                        <div className="moodIndicator" role="status" aria-live="polite">
+                            <span className="moodEmoji" aria-hidden="true">
+                                {aiInsights.mood === 'productive' ? '🚀' : 
+                                 aiInsights.mood === 'needs attention' ? '⚠️' : '😌'}
+                            </span>
+                            <span className="moodText">{aiInsights.mood}</span>
+                        </div>
+                    </div>
+
+                    <div className="insightCard">
+                        <h4>Sentiment Score</h4>
+                        <div className="sentimentBar" role="progressbar" aria-valuenow={aiInsights.sentiment} aria-valuemin="0" aria-valuemax="100">
+                            <div 
+                                className="sentimentFill"
+                                style={{width: `${aiInsights.sentiment}%`}}
+                            ></div>
+                            <span className="sentimentScore">{aiInsights.sentiment}%</span>
+                        </div>
+                    </div>
+
+                    <div className="insightCard">
+                        <h4>Recommended Next Action</h4>
+                        <div className="nextAction" role="status" aria-live="polite">
+                            <span className="actionIcon" aria-hidden="true">💡</span>
+                            <span>{aiInsights.nextAction}</span>
+                        </div>
+                    </div>
+
+                    <div className="insightCard">
+                        <h4>AI Recommendations</h4>
+                        <div className="recommendations">
+                            {aiInsights.recommendations.map((rec, index) => (
+                                <div key={index} className="recommendation">
+                                    <span className="recIcon" aria-hidden="true">✨</span>
+                                    <span>{rec}</span>
+                                </div>
+                            ))}
+                        </div>
+                        <button 
+                            className="sentimentButton"
+                            onClick={() => navigate("/sentiment")}
+                            style={{
+                                marginTop: '10px',
+                                padding: '8px 16px',
+                                background: 'rgba(255, 255, 255, 0.2)',
+                                border: 'none',
+                                borderRadius: '8px',
+                                color: 'white',
+                                cursor: 'pointer',
+                                width: '100%'
+                            }}
+                            tabIndex={sidebarOpen ? 0 : -1}
+                            aria-label="Navigate to full sentiment analysis page"
+                        >
+                            🧠 View Full Analysis
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Sidebar Toggle Button */}
+            <button 
+                className="sidebarToggle"
+                onClick={() => setSidebarOpen(true)}
+                aria-label="Open AI Insights Sidebar"
+                aria-expanded={sidebarOpen}
+                aria-controls="ai-sidebar"
+            >
+                🧠 AI
+            </button>
+
             {/* Background Elements */}
             <div className="homeBackground">
                 <div className="homeGradient"></div>
@@ -49,6 +195,13 @@ function HomeComponent() {
                     >
                         <span className="buttonIcon">📋</span>
                         <span>History</span>
+                    </button>
+                    <button 
+                        className="navButton sentimentButton"
+                        onClick={() => navigate("/sentiment")}
+                    >
+                        <span className="buttonIcon">🧠</span>
+                        <span>Sentiment</span>
                     </button>
                     <button 
                         className="navButton logoutButton"

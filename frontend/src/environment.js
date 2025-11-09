@@ -1,8 +1,4 @@
-let IS_PROD = true;
-const server = IS_PROD ?
-   "http://localhost:8000" :
-
-    "http://localhost:8000"
-
+// Get server URL from environment variable or use default
+const server = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
 export default server;

@@ -7,11 +7,13 @@ import Healthcare from './Healthcare'
 import Finance from './Finance'
 import Study from './Study'
 import Travelling from './Travelling'
+import SentimentAnalysis from './SentimentAnalysis'
 import Meetings from './Meetings'
 import Settings from './Settings'
+import AISolution from './AISolution'
 
 export default function LandingPage() {
-    const [activePage, setActivePage] = useState('healthcare')
+    const [activePage, setActivePage] = useState('aisolution')
     const navigate = useNavigate()
     const [isLoggedIn, setIsLoggedIn] = useState(false)
 
@@ -33,11 +35,13 @@ export default function LandingPage() {
     }
 
     const sidebarOptions = [
+        { id: 'aisolution', label: 'AI Solution', icon: '🤖' },
         { id: 'healthcare', label: 'Healthcare', icon: '🩺' },
         { id: 'finance', label: 'Finance', icon: '💹' },
         { id: 'study', label: 'Study', icon: '📚' },
         { id: 'travelling', label: 'Travelling', icon: '✈️' },
-         { id: 'meetings', label: 'Meetings', icon: '📞' },
+        { id: 'sentiment', label: 'Sentiment', icon: '🧠' },
+        { id: 'meetings', label: 'Meetings', icon: '📞' },
         { id: 'settings', label: 'Settings', icon: '⚙️' }
     ]
 
@@ -56,6 +60,8 @@ export default function LandingPage() {
 
     const renderActivePage = () => {
         switch (activePage) {
+            case 'aisolution':
+                return <AISolution />
             case 'healthcare':
                 return <Healthcare />
             case 'finance':
@@ -64,12 +70,14 @@ export default function LandingPage() {
                 return <Study />
             case 'travelling':
                 return <Travelling />
+            case 'sentiment':
+                return <SentimentAnalysis />
             case 'meetings':
                 return <Meetings />
             case 'settings':
                 return <Settings />
             default:
-                return <Healthcare />
+                return <AISolution />
         }
     }
 
@@ -103,10 +111,7 @@ export default function LandingPage() {
             <div className="mainLayout">
                 {/* Sidebar */}
                 <div className="sidebar">
-                    <div className="sidebarHeader">
-                        <h3>🤖 AI Domains</h3>
-                        <p style={{fontSize: '0.85rem', opacity: 0.8, marginTop: '0.5rem'}}>Real-time insights & expert support</p>
-                    </div>
+                
                     <div className="sidebarOptions">
                         {sidebarOptions.map((option) => (
                             <div

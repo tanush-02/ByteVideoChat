@@ -1,7 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../contexts/AuthContext'
-import { fetchHealthTips, fetchHealthNews, generateAIInsight } from '../services/apiService'
+import { fetchHealthTips, fetchHealthNews } from '../services/apiService'
+import { getDomainInsights } from '../services/geminiService'
 import { useNavigate } from 'react-router-dom'
+import MarkdownRenderer from '../components/MarkdownRenderer'
 import './DomainPages.css'
 
 export default function Healthcare() {
@@ -25,7 +27,15 @@ export default function Healthcare() {
                 
                 setHealthTip(tip)
                 setHealthNews(news)
-                setAiInsight(generateAIInsight('healthcare', {}))
+                
+                // Fetch AI insights from Gemini API
+                try {
+                    const insight = await getDomainInsights('healthcare', `Health tip: ${tip}`)
+                    setAiInsight(insight)
+                } catch (error) {
+                    console.error('Error fetching AI insights:', error)
+                    setAiInsight('Providing healthcare recommendations and wellness strategies...')
+                }
             } catch (error) {
                 console.error('Error loading health data:', error)
             } finally {
@@ -93,7 +103,9 @@ export default function Healthcare() {
                             <span className="ai-icon">🤖</span>
                             <h3>AI Health Recommendation</h3>
                         </div>
-                        <p className="ai-content">{aiInsight}</p>
+                        <div className="ai-content">
+                            <MarkdownRenderer content={aiInsight} />
+                        </div>
                         <p className="ai-timestamp">Generated at {new Date().toLocaleTimeString()}</p>
                     </div>
 

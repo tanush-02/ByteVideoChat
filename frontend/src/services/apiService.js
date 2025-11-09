@@ -235,3 +235,42 @@ export const generateAIInsight = (domain, data) => {
     return insights[domain] ? insights[domain](data) : 'AI is analyzing your data...';
 };
 
+// Local Sentiment Analysis (no API key required)
+// Lightweight lexicon-based scoring with a small curated dictionary
+export const analyzeSentiment = (text = '') => {
+    const lexicon = {
+        // positive
+        'good': 2, 'great': 3, 'excellent': 3, 'amazing': 3, 'awesome': 3, 'positive': 2, 'win': 2, 'growth': 2, 'profit': 2, 'secure': 2,
+        'happy': 2, 'love': 3, 'like': 1, 'recommend': 2, 'healthy': 2, 'well': 1, 'improve': 2, 'success': 2,
+        // negative
+        'bad': -2, 'poor': -2, 'terrible': -3, 'awful': -3, 'hate': -3, 'negative': -2, 'loss': -2, 'risky': -2, 'fail': -2,
+        'down': -1, 'issue': -1, 'bug': -2, 'problem': -2, 'sick': -2, 'stress': -1, 'weak': -2
+    };
+
+    const tokens = (text || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .split(/\s+/)
+        .filter(Boolean);
+
+    let score = 0;
+    const contributions = {};
+    for (const t of tokens) {
+        if (lexicon[t]) {
+            score += lexicon[t];
+            contributions[t] = (contributions[t] || 0) + lexicon[t];
+        }
+    }
+
+    // Normalize rough score to -1..1 range based on token count
+    const norm = tokens.length ? Math.max(-1, Math.min(1, score / Math.max(8, tokens.length))) : 0;
+    const label = norm > 0.2 ? 'Positive' : norm < -0.2 ? 'Negative' : 'Neutral';
+
+    const topContributors = Object.entries(contributions)
+        .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))
+        .slice(0, 6)
+        .map(([word, val]) => ({ word, value: val }));
+
+    return { score: norm, label, contributions: topContributors, tokens: tokens.length };
+};
+

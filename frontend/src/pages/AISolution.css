@@ -1,0 +1,525 @@
+/* AI Solution Page Styles */
+
+.ai-solution-container {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    animation: fadeIn 0.5s ease-in;
+}
+
+.ai-solution-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.ai-solution-header h2 {
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.ai-solution-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+}
+
+/* Domain Selector Section */
+.domain-selector-section {
+    margin-bottom: 2rem;
+}
+
+.domain-selector-section h3 {
+    color: white;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.domain-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.domain-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.domain-button:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.domain-button.active {
+    border-width: 3px;
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+}
+
+.domain-button-icon {
+    font-size: 2.5rem;
+}
+
+.domain-button-label {
+    font-size: 1.1rem;
+}
+
+/* Query Section */
+.query-section {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.query-input-group,
+.context-input-group {
+    margin-bottom: 1.5rem;
+}
+
+.query-input-group label,
+.context-input-group label {
+    display: block;
+    color: white;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+.query-input,
+.context-input {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1rem;
+    backdrop-filter: blur(10px);
+    box-sizing: border-box;
+}
+
+.query-input::placeholder,
+.context-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.query-input:focus,
+.context-input:focus {
+    outline: none;
+    border-color: rgba(102, 126, 234, 0.6);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.context-input {
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+}
+
+.generate-button {
+    width: 100%;
+    padding: 1.2rem 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.generate-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+.generate-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.spinner-small {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Error Message */
+.error-message {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.5);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #fecaca;
+}
+
+.error-message p {
+    margin: 0;
+}
+
+/* Domain Info Card */
+.domain-info-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.domain-info-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.info-icon {
+    font-size: 2rem;
+}
+
+.domain-info-header h3 {
+    color: white;
+    margin: 0;
+}
+
+.domain-info-content {
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.8;
+    white-space: pre-wrap;
+}
+
+/* Procedure Container */
+.procedure-container {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.procedure-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.procedure-header-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.procedure-icon {
+    font-size: 2.5rem;
+}
+
+.procedure-header-content h3 {
+    color: white;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.procedure-subtitle {
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0.25rem 0 0 0;
+    font-size: 0.9rem;
+}
+
+.reset-button {
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.reset-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Step Navigation */
+.step-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+}
+
+.nav-button {
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.nav-button:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.nav-button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.step-counter {
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+/* Steps Container */
+.steps-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.step-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.step-card:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateX(5px);
+}
+
+.step-card.active {
+    background: rgba(102, 126, 234, 0.2);
+    border-color: rgba(102, 126, 234, 0.5);
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+}
+
+.step-card.completed {
+    opacity: 0.7;
+}
+
+.step-card.completed .step-number {
+    background: rgba(34, 197, 94, 0.3);
+    color: #22c55e;
+}
+
+.step-number {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.step-content {
+    flex: 1;
+}
+
+.step-content h4 {
+    color: white;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+}
+
+.step-content p {
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Markdown in step descriptions */
+.step-description {
+    font-size: 0.95rem;
+}
+
+.step-description .markdown-content {
+    margin: 0;
+}
+
+.step-description .markdown-content p {
+    margin: 0.5rem 0;
+}
+
+.step-description .markdown-content p:first-child {
+    margin-top: 0;
+}
+
+.step-description .markdown-content p:last-child {
+    margin-bottom: 0;
+}
+
+.step-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    border-radius: 15px 0 0 15px;
+}
+
+/* Procedure Content */
+.procedure-content {
+    margin-bottom: 2rem;
+}
+
+.procedure-text {
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.8;
+    font-size: 1.1rem;
+}
+
+.procedure-text p {
+    margin: 1rem 0;
+}
+
+/* Full Procedure */
+.full-procedure {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.full-procedure h4 {
+    color: white;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.procedure-text-full {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1.5rem;
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.8;
+    white-space: pre-wrap;
+    font-size: 1rem;
+}
+
+.procedure-timestamp {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-align: right;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .ai-solution-container {
+        padding: 1rem;
+    }
+
+    .ai-solution-header h2 {
+        font-size: 2rem;
+    }
+
+    .domain-buttons {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .query-section {
+        padding: 1.5rem;
+    }
+
+    .procedure-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .step-navigation {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .step-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .step-indicator {
+        width: 100%;
+        height: 4px;
+        top: 0;
+        left: 0;
+        border-radius: 15px 15px 0 0;
+    }
+}
+

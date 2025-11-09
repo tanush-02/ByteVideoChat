@@ -1,0 +1,192 @@
+/* Markdown Renderer Styles */
+
+.markdown-content {
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.8;
+    font-size: 1rem;
+}
+
+.markdown-content * {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Headings */
+.markdown-h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 0.5rem;
+}
+
+.markdown-h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: white;
+    margin-top: 1.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.markdown-h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Paragraphs */
+.markdown-p {
+    margin: 1rem 0;
+    line-height: 1.8;
+}
+
+/* Lists */
+.markdown-ul,
+.markdown-ol {
+    margin: 1rem 0;
+    padding-left: 2rem;
+}
+
+.markdown-li {
+    margin: 0.5rem 0;
+    line-height: 1.7;
+}
+
+.markdown-ul .markdown-li {
+    list-style-type: disc;
+}
+
+.markdown-ol .markdown-li {
+    list-style-type: decimal;
+}
+
+/* Code blocks */
+.code-block {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    overflow-x: auto;
+}
+
+.code-block code {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    background: transparent;
+    padding: 0;
+}
+
+.inline-code {
+    background: rgba(102, 126, 234, 0.2);
+    color: #a5b4fc;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9em;
+}
+
+/* Links */
+.markdown-link {
+    color: #667eea;
+    text-decoration: underline;
+    transition: color 0.3s ease;
+}
+
+.markdown-link:hover {
+    color: #764ba2;
+}
+
+/* Blockquotes */
+.markdown-blockquote {
+    border-left: 4px solid rgba(102, 126, 234, 0.5);
+    padding-left: 1rem;
+    margin: 1rem 0;
+    color: rgba(255, 255, 255, 0.8);
+    font-style: italic;
+    background: rgba(102, 126, 234, 0.1);
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+/* Tables */
+.markdown-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.markdown-th {
+    background: rgba(102, 126, 234, 0.3);
+    color: white;
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.markdown-td {
+    padding: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.markdown-table tr:last-child .markdown-td {
+    border-bottom: none;
+}
+
+.markdown-table tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Strong and emphasis */
+.markdown-content strong {
+    color: white;
+    font-weight: 600;
+}
+
+.markdown-content em {
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Horizontal rules */
+.markdown-content hr {
+    border: none;
+    border-top: 2px solid rgba(255, 255, 255, 0.2);
+    margin: 2rem 0;
+}
+
+/* Highlight.js theme adjustments for dark background */
+.markdown-content .hljs {
+    background: rgba(0, 0, 0, 0.5) !important;
+    border-radius: 4px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .markdown-h1 {
+        font-size: 1.5rem;
+    }
+
+    .markdown-h2 {
+        font-size: 1.25rem;
+    }
+
+    .markdown-h3 {
+        font-size: 1.1rem;
+    }
+
+    .code-block {
+        font-size: 0.85rem;
+    }
+}
+
+

@@ -1,7 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../contexts/AuthContext'
-import { fetchExchangeRates, fetchStockData, generateAIInsight } from '../services/apiService'
+import { fetchExchangeRates, fetchStockData } from '../services/apiService'
+import { getDomainInsights } from '../services/geminiService'
 import { useNavigate } from 'react-router-dom'
+import MarkdownRenderer from '../components/MarkdownRenderer'
 import './DomainPages.css'
 
 export default function Finance() {
@@ -35,7 +37,15 @@ export default function Finance() {
                 }
                 
                 setMarket(newMarket)
-                setAiInsight(generateAIInsight('finance', newMarket))
+                
+                // Fetch AI insights from Gemini API
+                try {
+                    const insight = await getDomainInsights('finance', `Current market data: NIFTY ${newMarket.nifty}, SENSEX ${newMarket.sensex}, USD/INR ${newMarket.usdInr}`)
+                    setAiInsight(insight)
+                } catch (error) {
+                    console.error('Error fetching AI insights:', error)
+                    setAiInsight('Analyzing market trends and providing financial recommendations...')
+                }
             } catch (error) {
                 console.error('Error loading market data:', error)
             } finally {
@@ -121,7 +131,9 @@ export default function Finance() {
                             <span className="ai-icon">🤖</span>
                             <h3>AI Financial Insight</h3>
                         </div>
-                        <p className="ai-content">{aiInsight}</p>
+                        <div className="ai-content">
+                            <MarkdownRenderer content={aiInsight} />
+                        </div>
                         <p className="ai-timestamp">Generated at {new Date().toLocaleTimeString()}</p>
                     </div>
 

@@ -2272,3 +2272,177 @@
   height: auto;
   border-radius: 20px;
 }
+/* AI Sidebar Styles */
+.aiSidebar {
+  position: fixed;
+  top: 0;
+  right: -350px;
+  width: 350px;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  backdrop-filter: blur(10px);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  transition: right 0.3s ease;
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.aiSidebar.open {
+  right: 0;
+}
+
+.sidebarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebarHeader h3 {
+  color: white;
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.closeSidebar {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.closeSidebar:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebarContent {
+  padding: 20px;
+}
+
+.insightCard {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
+  backdrop-filter: blur(5px);
+}
+
+.insightCard h4 {
+  color: white;
+  margin: 0 0 10px 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.moodIndicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.moodEmoji {
+  font-size: 24px;
+}
+
+.moodText {
+  color: white;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.sentimentBar {
+  position: relative;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  height: 20px;
+  overflow: hidden;
+}
+
+.sentimentFill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb);
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+.sentimentScore {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.nextAction {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+}
+
+.actionIcon {
+  font-size: 18px;
+}
+
+.recommendations {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recommendation {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: white;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.recIcon {
+  font-size: 14px;
+  margin-top: 2px;
+}
+
+.sidebarToggle {
+  position: fixed;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+  z-index: 999;
+}
+
+.sidebarToggle:hover {
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+@media (max-width: 768px) {
+  .aiSidebar {
+    width: 100%;
+    right: -100%;
+  }
+  
+  .sidebarToggle {
+    right: 15px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+  }
+}

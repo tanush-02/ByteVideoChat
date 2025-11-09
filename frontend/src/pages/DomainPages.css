@@ -242,6 +242,19 @@
     margin: 1rem 0;
 }
 
+/* Markdown content within AI cards */
+.ai-content .markdown-content {
+    margin: 0;
+}
+
+.ai-content .markdown-content p:first-child {
+    margin-top: 0;
+}
+
+.ai-content .markdown-content p:last-child {
+    margin-bottom: 0;
+}
+
 .ai-timestamp {
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.6);

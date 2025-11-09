@@ -15,5 +15,5 @@ services:
   - type: web
     name: zoom-frontend
     env: static
-    buildCommand: cd frontend && npm install && npm run build
-    publishDir: ./frontend/build
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: ./frontend/build

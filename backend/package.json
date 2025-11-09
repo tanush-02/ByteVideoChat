@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "nodemon app.js",
     "start": "node app.js",
-    "prod": "pm2 app.js"
+    "prod": "pm2 app.js",
+    "build": "npm rebuild bcrypt --build-from-source"
   },
   "author": "apnacollege",
   "license": "ISC",

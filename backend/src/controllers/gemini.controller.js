@@ -31,6 +31,7 @@ let modelName = null;
 // Helper function to get an available model
 const getAvailableModel = async () => {
     if (cachedModel && modelName) {
+        console.log(`Using cached model: ${modelName}`);
         return cachedModel;
     }
 
@@ -43,30 +44,39 @@ const getAvailableModel = async () => {
         "gemini-pro",  // Legacy fallback
     ];
     
-    // Try models directly with a simple test
+    // Try models directly - skip test, just try to use the model
     const genAIInstance = getGenAI();
+    let lastError = null;
+    
     for (const modelNameToTry of modelsToTry) {
         try {
             const model = genAIInstance.getGenerativeModel({ model: modelNameToTry });
-            // Test if model works with a minimal prompt
-            const testResult = await model.generateContent("Hi");
-            await testResult.response;
-            console.log(`✓ Successfully using model: ${modelNameToTry}`);
+            // Don't test with "Hi" - just cache and use it
+            // The actual request will fail if the model doesn't work
+            console.log(`✓ Attempting to use model: ${modelNameToTry}`);
             cachedModel = model;
             modelName = modelNameToTry;
             return model;
         } catch (error) {
+            lastError = error;
             // Check if it's a 404 (model not found) vs other errors
             if (error.status === 404 || error.message?.includes('404') || error.message?.includes('not found')) {
                 console.log(`✗ Model ${modelNameToTry} not found (404), trying next...`);
                 continue;
             } else {
                 // For other errors (like API key issues), log and continue
-                console.log(`✗ Model ${modelNameToTry} error: ${error.message}, trying next...`);
+                console.log(`✗ Model ${modelNameToTry} error: ${error.message}`);
+                console.log(`  Error status: ${error.status || 'N/A'}`);
+                if (error.message?.includes('API key') || error.message?.includes('authentication')) {
+                    console.error(`  ⚠️  API key issue detected! Check your GEMINI_API_KEY`);
+                }
                 continue;
             }
         }
     }
+    
+    // If we get here, all models failed to initialize
+    console.error("All models failed to initialize. Last error:", lastError?.message);
     
     throw new Error(`No available Gemini models found. 
     
@@ -83,12 +93,18 @@ Make sure you're using a valid Google AI Studio API key (not Vertex AI).`);
 const generateContentWithFallback = async (prompt) => {
     try {
         const model = await getAvailableModel();
+        console.log(`Generating content with model: ${modelName || 'cached'}`);
         const result = await model.generateContent(prompt);
         const response = await result.response;
-        return response.text();
+        const text = response.text();
+        console.log(`Successfully generated content (${text.length} characters)`);
+        return text;
     } catch (error) {
         // Reset cache on error so we can try again
+        console.error("Error in generateContentWithFallback:", error.message);
+        console.error("Error details:", error);
         cachedModel = null;
+        modelName = null;
         throw error;
     }
 };
@@ -150,10 +166,12 @@ Context: ${context || 'General travel advice'}`,
             timestamp: new Date().toISOString()
         });
     } catch (error) {
-        console.error("Gemini API Error:", error);
+        console.error("Gemini API Error in getDomainInsights:", error);
+        console.error("Error stack:", error.stack);
         res.status(500).json({ 
             message: "Failed to generate insights",
-            error: error.message 
+            error: error.message,
+            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 };
@@ -236,10 +254,12 @@ Context: ${context || 'General travel planning'}`,
             timestamp: new Date().toISOString()
         });
     } catch (error) {
-        console.error("Gemini API Error:", error);
+        console.error("Gemini API Error in getSolutionProcedure:", error);
+        console.error("Error stack:", error.stack);
         res.status(500).json({ 
             message: "Failed to generate solution procedure",
-            error: error.message 
+            error: error.message,
+            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 };
@@ -290,10 +310,12 @@ Format the response in a structured, easy-to-read format.`;
             timestamp: new Date().toISOString()
         });
     } catch (error) {
-        console.error("Gemini API Error:", error);
+        console.error("Gemini API Error in getDomainInfo:", error);
+        console.error("Error stack:", error.stack);
         res.status(500).json({ 
             message: "Failed to fetch domain information",
-            error: error.message 
+            error: error.message,
+            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 };

@@ -1,17 +1,28 @@
 import httpStatus from "http-status";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Get API key from environment variables
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+// Get API key from environment variables (will be set after dotenv.config() in app.js)
+// Use a function to get it lazily to ensure dotenv has loaded
+const getGeminiApiKey = () => {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+        console.error("ERROR: GEMINI_API_KEY is not set in environment variables!");
+        console.error("For local development: Create a .env file in the backend directory");
+        console.error("For Render deployment: Set GEMINI_API_KEY in Render dashboard Environment section");
+        throw new Error("GEMINI_API_KEY environment variable is required");
+    }
+    return apiKey;
+};
 
-if (!GEMINI_API_KEY) {
-    console.error("ERROR: GEMINI_API_KEY is not set in environment variables!");
-    console.error("Please create a .env file in the backend directory with:");
-    console.error("GEMINI_API_KEY=your_api_key_here");
-    throw new Error("GEMINI_API_KEY environment variable is required");
-}
-
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+// Initialize genAI lazily when first used
+let genAI = null;
+const getGenAI = () => {
+    if (!genAI) {
+        const apiKey = getGeminiApiKey();
+        genAI = new GoogleGenerativeAI(apiKey);
+    }
+    return genAI;
+};
 
 // Cache for available model (to avoid repeated API calls)
 let cachedModel = null;
@@ -33,9 +44,10 @@ const getAvailableModel = async () => {
     ];
     
     // Try models directly with a simple test
+    const genAIInstance = getGenAI();
     for (const modelNameToTry of modelsToTry) {
         try {
-            const model = genAI.getGenerativeModel({ model: modelNameToTry });
+            const model = genAIInstance.getGenerativeModel({ model: modelNameToTry });
             // Test if model works with a minimal prompt
             const testResult = await model.generateContent("Hi");
             await testResult.response;
@@ -297,10 +309,11 @@ const testModels = async (req, res) => {
         ];
         
         const results = [];
+        const genAIInstance = getGenAI();
         
         for (const modelName of modelsToTry) {
             try {
-                const model = genAI.getGenerativeModel({ model: modelName });
+                const model = genAIInstance.getGenerativeModel({ model: modelName });
                 const testResult = await model.generateContent("test");
                 await testResult.response;
                 results.push({ model: modelName, status: "✓ Working" });
@@ -317,8 +330,8 @@ const testModels = async (req, res) => {
         res.status(200).json({
             message: "Model availability test",
             results,
-            apiKeyConfigured: !!GEMINI_API_KEY,
-            apiKeyPreview: GEMINI_API_KEY ? GEMINI_API_KEY.substring(0, 10) + "..." : "Not configured",
+            apiKeyConfigured: !!process.env.GEMINI_API_KEY,
+            apiKeyPreview: process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.substring(0, 10) + "..." : "Not configured",
             note: "If all models fail, check: https://makersuite.google.com/app/apikey"
         });
     } catch (error) {

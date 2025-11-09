@@ -25,6 +25,15 @@ app.use(cors({
 app.use(express.json({ limit: "40kb" }));
 app.use(express.urlencoded({ limit: "40kb", extended: true }));
 
+// Debug middleware to log all requests
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    if (req.body && Object.keys(req.body).length > 0) {
+        console.log("Request body:", req.body);
+    }
+    next();
+});
+
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/comments", commentRoutes);
 app.use("/api/v1/ai", geminiRoutes);

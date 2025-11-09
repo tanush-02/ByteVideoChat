@@ -179,11 +179,21 @@ Context: ${context || 'General travel advice'}`,
 // Get step-by-step solution procedure for a domain
 const getSolutionProcedure = async (req, res) => {
     try {
+        console.log("=== AI QUERY DEBUG START ===");
+        console.log("Request body:", req.body);
+        console.log("API Key exists:", !!process.env.GEMINI_API_KEY);
+        console.log("API Key preview:", process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.substring(0, 10) + "..." : "NOT SET");
+        
         const { domain, query, context } = req.body;
         
         if (!domain) {
+            console.log("ERROR: Domain is missing");
             return res.status(400).json({ message: "Domain is required" });
         }
+        
+        console.log("Domain:", domain);
+        console.log("Query:", query);
+        console.log("Context:", context);
 
         const solutionPrompts = {
             finance: `Create a step-by-step procedure for financial planning and management. 
@@ -243,8 +253,15 @@ Context: ${context || 'General travel planning'}`,
 
         const prompt = solutionPrompts[domain] || `Create a step-by-step procedure for ${domain}. ${query ? `Query: ${query}` : ''} Context: ${context || 'General information'}`;
 
+        console.log("Generated prompt:", prompt.substring(0, 100) + "...");
+        console.log("Calling generateContentWithFallback...");
+        
         // Generate content with model fallback
         const text = await generateContentWithFallback(prompt);
+        
+        console.log("AI Response received, length:", text.length);
+        console.log("Response preview:", text.substring(0, 100) + "...");
+        console.log("=== AI QUERY DEBUG END ===");
 
         res.status(httpStatus.OK).json({
             domain,
@@ -254,6 +271,13 @@ Context: ${context || 'General travel planning'}`,
             timestamp: new Date().toISOString()
         });
     } catch (error) {
+        console.log("=== AI QUERY ERROR DEBUG ===");
+        console.error("Error type:", error.constructor.name);
+        console.error("Error message:", error.message);
+        console.error("Error status:", error.status);
+        console.error("Error code:", error.code);
+        console.error("Full error object:", error);
+        console.log("=== AI QUERY ERROR DEBUG END ===");
         console.error("Gemini API Error in getSolutionProcedure:", error);
         console.error("Error stack:", error.stack);
         res.status(500).json({ 

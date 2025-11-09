@@ -1,4 +1,4 @@
 // Get server URL from environment variable or use default
-const server = process.env.REACT_APP_API_URL || "http://localhost:8000";
+const server = process.env.REACT_APP_API_URL || "https://bytebackend-0aya.onrender.com";
 
 export default server;

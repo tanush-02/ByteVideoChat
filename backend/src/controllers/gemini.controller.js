@@ -196,62 +196,32 @@ const getSolutionProcedure = async (req, res) => {
         console.log("Context:", context);
 
         const solutionPrompts = {
-            finance: `Create a step-by-step procedure for financial planning and management. 
-${query ? `Specific query: ${query}` : 'Provide a comprehensive financial solution procedure.'}
-Include:
-1. Assessment phase
-2. Planning phase
-3. Implementation steps
-4. Monitoring and review
-5. Risk management
-Format as a clear, numbered step-by-step guide.
+            finance: `Create a concise 5-7 step procedure for: ${query || 'financial planning'}
+IMPORTANT: Provide ONLY 5-7 essential steps. Be specific and actionable.
+Format: 1. Step one 2. Step two etc.
 Context: ${context || 'General financial planning'}`,
             
-            healthcare: `Create a step-by-step procedure for healthcare and wellness management.
-${query ? `Specific query: ${query}` : 'Provide a comprehensive healthcare solution procedure.'}
-Include:
-1. Health assessment
-2. Goal setting
-3. Action plan
-4. Implementation steps
-5. Monitoring and adjustments
-Format as a clear, numbered step-by-step guide.
+            healthcare: `Create a concise 5-7 step procedure for: ${query || 'healthcare management'}
+IMPORTANT: Provide ONLY 5-7 essential steps. Be specific and actionable.
+Format: 1. Step one 2. Step two etc.
 Context: ${context || 'General healthcare management'}`,
             
-            study: `Create a step-by-step procedure for effective learning and study management.
-${query ? `Specific query: ${query}` : 'Provide a comprehensive study solution procedure.'}
-Include:
-1. Learning assessment
-2. Goal setting
-3. Study plan creation
-4. Implementation strategies
-5. Review and improvement
-Format as a clear, numbered step-by-step guide.
+            study: `Create a concise 5-7 step procedure for: ${query || 'effective studying'}
+IMPORTANT: Provide ONLY 5-7 essential steps. Be specific and actionable.
+Format: 1. Step one 2. Step two etc.
 Context: ${context || 'General study planning'}`,
             
-            travel: `Create a step-by-step procedure for travel planning and management.
-${query ? `Specific query: ${query}` : 'Provide a comprehensive travel solution procedure.'}
-Include:
-1. Destination research
-2. Budget planning
-3. Itinerary creation
-4. Booking and preparation
-5. Travel execution
-Format as a clear, numbered step-by-step guide.
+            travel: `Create a concise 5-7 step procedure for: ${query || 'travel planning'}
+IMPORTANT: Provide ONLY 5-7 essential steps. Be specific and actionable.
+Format: 1. Step one 2. Step two etc.
 Context: ${context || 'General travel planning'}`,
-            travelling: `Create a step-by-step procedure for travel planning and management.
-${query ? `Specific query: ${query}` : 'Provide a comprehensive travel solution procedure.'}
-Include:
-1. Destination research
-2. Budget planning
-3. Itinerary creation
-4. Booking and preparation
-5. Travel execution
-Format as a clear, numbered step-by-step guide.
+            travelling: `Create a concise 5-7 step procedure for: ${query || 'travel planning'}
+IMPORTANT: Provide ONLY 5-7 essential steps. Be specific and actionable.
+Format: 1. Step one 2. Step two etc.
 Context: ${context || 'General travel planning'}`,
         };
 
-        const prompt = solutionPrompts[domain] || `Create a step-by-step procedure for ${domain}. ${query ? `Query: ${query}` : ''} Context: ${context || 'General information'}`;
+        const prompt = solutionPrompts[domain] || `Create a concise 5-7 step procedure for ${domain}. Query: ${query || 'general guidance'}. IMPORTANT: Provide ONLY 5-7 essential steps. Context: ${context || 'General information'}`;
 
         console.log("Generated prompt:", prompt.substring(0, 100) + "...");
         console.log("Calling generateContentWithFallback...");

@@ -7,6 +7,7 @@ import { connectToSocket } from "./src/controllers/socketManager.js";
 import userRoutes from "./src/routes/users.routes.js";
 import commentRoutes from "./src/routes/comments.routes.js";
 import geminiRoutes from "./src/routes/gemini.routes.js";
+import healthRoutes from "./src/routes/health.routes.js";
 
 // Load environment variables from .env file (for local development)
 // On Render, environment variables are set in the dashboard
@@ -37,6 +38,7 @@ app.use((req, res, next) => {
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/comments", commentRoutes);
 app.use("/api/v1/ai", geminiRoutes);
+app.use("/api/v1/health", healthRoutes);
 
 const start = async () => {
     // Log environment status for debugging

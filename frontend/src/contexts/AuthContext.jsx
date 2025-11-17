@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
                     localStorage.removeItem("postLoginRedirect");
                     router(redirect);
                 } else {
-                    router("/home")
+                    router("/landing")
                 }
             }
         } catch (err) {

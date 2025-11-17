@@ -78,7 +78,7 @@ function HomeComponent() {
 
     let handleLogout = () => {
         localStorage.removeItem("token")
-        navigate("/auth")
+        navigate("/")
     }
 
     return (

@@ -8,6 +8,7 @@ import userRoutes from "./src/routes/users.routes.js";
 import commentRoutes from "./src/routes/comments.routes.js";
 import geminiRoutes from "./src/routes/gemini.routes.js";
 import healthRoutes from "./src/routes/health.routes.js";
+import financeRoutes from "./src/routes/finance.routes.js";
 
 // Load environment variables from .env file (for local development)
 // On Render, environment variables are set in the dashboard
@@ -39,6 +40,7 @@ app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/comments", commentRoutes);
 app.use("/api/v1/ai", geminiRoutes);
 app.use("/api/v1/health", healthRoutes);
+app.use("/api/v1/finance", financeRoutes);
 
 const start = async () => {
     // Log environment status for debugging

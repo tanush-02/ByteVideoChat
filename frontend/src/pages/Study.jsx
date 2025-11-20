@@ -59,7 +59,7 @@ export default function Study() {
     }, [getComments])
 
     const handleExpertChat = () => {
-        const randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const randomCode = "StudyHelp";
         navigate(`/${randomCode}`);
     }
 

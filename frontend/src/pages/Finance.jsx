@@ -159,7 +159,7 @@ export default function Finance() {
     }
 
     const handleExpertChat = () => {
-        const randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const randomCode = "Finance";
         navigate(`/${randomCode}`);
     }
 

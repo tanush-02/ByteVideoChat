@@ -25,8 +25,8 @@ app.use(cors({
     origin: ["http://localhost:3000", "https://bytevideochat-2m5s.onrender.com"],
     credentials: true
 }));
-app.use(express.json({ limit: "40kb" }));
-app.use(express.urlencoded({ limit: "40kb", extended: true }));
+app.use(express.json({ limit: "10mb" })); // Increased for route geometry data
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 // Debug middleware to log all requests
 app.use((req, res, next) => {

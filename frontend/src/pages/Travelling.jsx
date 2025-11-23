@@ -365,9 +365,18 @@ export default function Travelling() {
             }
             
             // Verify the save was successful
-            if (!response || !response.data) {
-                throw new Error('Save response was invalid')
+            if (!response) {
+                throw new Error('No response from server')
             }
+            
+            // Check if response has data property (from axios response) or is the data itself
+            const responseData = response.data || response
+            
+            if (!responseData) {
+                throw new Error('Save response was invalid - no data received')
+            }
+            
+            console.log('Save successful, reloading plans...')
             
             // Reload plans
             const data = await getTravelRecord(token)

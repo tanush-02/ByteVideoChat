@@ -15,28 +15,11 @@ const getTravelRecord = async (req, res) => {
         let travelRecord = await Travel.findOne({ userId: user.username });
         
         if (!travelRecord) {
-<<<<<<< HEAD
-            // Create a new travel record if it doesn't exist
-            travelRecord = new Travel({
-                userId: user.username,
-                upcomingTrips: [],
-                pastTrips: [],
-                preferences: {
-                    budgetRange: { min: 0, max: 0 },
-                    preferredDestinations: [],
-                    travelStyle: 'Mid-range',
-                    accommodationPreference: 'Hotel',
-                    transportationPreference: 'Flight',
-                    interests: []
-                },
-                wishlist: []
-=======
             travelRecord = new Travel({
                 userId: user.username,
                 futurePlans: [],
                 activePlans: [],
                 travelHistory: []
->>>>>>> 8c06090 (Your updates)
             });
             await travelRecord.save();
         }
@@ -64,12 +47,7 @@ const updateTravelRecord = async (req, res) => {
         }
 
         // Update fields if provided
-<<<<<<< HEAD
-        const updateFields = ['upcomingTrips', 'pastTrips', 'preferences', 'wishlist'];
-
-=======
         const updateFields = ['futurePlans', 'activePlans', 'travelHistory'];
->>>>>>> 8c06090 (Your updates)
         updateFields.forEach(field => {
             if (req.body[field] !== undefined) {
                 travelRecord[field] = req.body[field];
@@ -83,9 +61,6 @@ const updateTravelRecord = async (req, res) => {
     }
 };
 
-<<<<<<< HEAD
-export { getTravelRecord, updateTravelRecord };
-=======
 // Add future travel plan
 const addFuturePlan = async (req, res) => {
     const { token, plan } = req.body;
@@ -201,14 +176,18 @@ const addHistoryPlan = async (req, res) => {
     const { token, plan } = req.body;
 
     try {
+        console.log('Received request to add history plan:', { token: token ? 'present' : 'missing', planKeys: Object.keys(plan || {}) });
+        
         const user = await User.findOne({ token: token });
         if (!user) {
+            console.error('User not found for token');
             return res.status(httpStatus.UNAUTHORIZED).json({ message: "User not found" });
         }
 
         let travelRecord = await Travel.findOne({ userId: user.username });
         if (!travelRecord) {
             travelRecord = new Travel({ userId: user.username });
+            console.log('Created new travel record for user:', user.username);
         }
 
         // Ensure route structure is valid
@@ -414,5 +393,3 @@ export {
     deletePlan,
     updatePlan
 };
->>>>>>> 8c06090 (Your updates)
-

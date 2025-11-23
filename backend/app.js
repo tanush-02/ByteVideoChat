@@ -44,6 +44,11 @@ app.use("/api/v1/health", healthRoutes);
 app.use("/api/v1/finance", financeRoutes);
 app.use("/api/v1/travel", travelRoutes);
 
+// Debug route to check if travel routes are registered
+app.get("/api/v1/travel/test", (req, res) => {
+    res.json({ message: "Travel routes are working!", timestamp: new Date().toISOString() });
+});
+
 const start = async () => {
     // Log environment status for debugging
     console.log("Environment check:");

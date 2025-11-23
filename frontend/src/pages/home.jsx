@@ -218,7 +218,7 @@ function HomeComponent() {
                 <div className="homeContent">
                     <div className="heroSection">
                         <h2 className="heroTitle">
-                            <span className="gradientText">Connect</span> with your loved ones
+                            <span className="gradientText">Connect</span> with your Experts
                         </h2>
                         <p className="heroSubtitle">
                             High-quality video calls with crystal clear audio and seamless experience

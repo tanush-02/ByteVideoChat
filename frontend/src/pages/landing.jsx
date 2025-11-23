@@ -31,7 +31,7 @@ export default function LandingPage() {
     const handleLogout = () => {
         localStorage.removeItem("token")
         setIsLoggedIn(false)
-        navigate("/auth")
+        navigate("/")
     }
 
     const sidebarOptions = [
@@ -41,7 +41,7 @@ export default function LandingPage() {
         { id: 'study', label: 'Study', icon: '📚' },
         { id: 'travelling', label: 'Travelling', icon: '✈️' },
         { id: 'sentiment', label: 'Sentiment', icon: '🧠' },
-        { id: 'meetings', label: 'Meetings', icon: '📞' },
+         { id: 'meetings', label: 'Meetings', icon: '📞' },
         { id: 'settings', label: 'Settings', icon: '⚙️' }
     ]
 
@@ -93,7 +93,7 @@ export default function LandingPage() {
                     {isLoggedIn ? (
                         <>
                             <div className="btn btn-primary" onClick={() => navigate("/home")} role='button'>
-                                Home
+                                Chat
                             </div>
                             <div className="btn btn-danger" onClick={handleLogout} role='button'>
                                 Logout

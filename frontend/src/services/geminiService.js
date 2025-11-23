@@ -70,3 +70,26 @@ export const getDomainInfo = async (domain) => {
     }
 };
 
+// Get AI-powered sentiment recommendations
+export const getSentimentRecommendations = async (userProfile, overallScore, domainData = {}) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/sentiment-recommendations`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userProfile, overallScore, domainData }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch sentiment recommendations');
+        }
+
+        const data = await response.json();
+        return data.recommendations;
+    } catch (error) {
+        console.error('Error fetching sentiment recommendations:', error);
+        throw error;
+    }
+};
+

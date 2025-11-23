@@ -358,5 +358,131 @@ const testModels = async (req, res) => {
     }
 };
 
-export { getDomainInsights, getSolutionProcedure, getDomainInfo, testModels };
+// Get AI-powered sentiment recommendations based on user profile
+const getSentimentRecommendations = async (req, res) => {
+    try {
+        const { userProfile, overallScore, domainData } = req.body;
+        
+        if (!userProfile) {
+            return res.status(400).json({ message: "User profile data is required" });
+        }
+
+        // Extract real user data
+        const healthData = userProfile.health?.rawData || domainData?.health;
+        const financeData = userProfile.finance?.rawData || domainData?.finance;
+        const travelData = userProfile.travel?.rawData || domainData?.travel;
+        
+        // Build comprehensive context from real user data
+        let healthContext = 'No health data available';
+        if (healthData) {
+            const currentDiseases = healthData.currentDiseases?.length || 0;
+            const activeMeds = healthData.medications?.filter(m => m.isActive)?.length || 0;
+            const recentExercises = healthData.exercises?.filter(e => {
+                const daysAgo = (Date.now() - new Date(e.date).getTime()) / (1000 * 60 * 60 * 24);
+                return daysAgo <= 7;
+            })?.length || 0;
+            const upcomingCheckups = healthData.checkups?.filter(c => new Date(c.scheduledDate) > new Date())?.length || 0;
+            
+            healthContext = `Current Health Status:
+- Active Conditions: ${currentDiseases} (${healthData.currentDiseases?.map(d => `${d.name} (${d.severity})`).join(', ') || 'None'})
+- Active Medications: ${activeMeds} (${healthData.medications?.filter(m => m.isActive).map(m => m.name).join(', ') || 'None'})
+- Exercises This Week: ${recentExercises}
+- Upcoming Checkups: ${upcomingCheckups}
+- Status: ${userProfile.health?.state?.status || 'Unknown'}`;
+        }
+        
+        let financeContext = 'No finance data available';
+        if (financeData) {
+            const totalSavings = financeData.savings?.total || 0;
+            const stocks = financeData.investments?.stocks || [];
+            const mutualFunds = financeData.investments?.mutualFunds || [];
+            const totalInvestments = financeData.investments?.total || 0;
+            const avgStockReturn = stocks.length > 0 
+                ? (stocks.reduce((sum, s) => sum + (s.profitLossPercent || 0), 0) / stocks.length).toFixed(1)
+                : 0;
+            
+            financeContext = `Portfolio Status:
+- Total Savings: ₹${(totalSavings / 1000).toFixed(0)}K
+- Total Investments: ₹${(totalInvestments / 1000).toFixed(0)}K
+- Stocks: ${stocks.length} holdings (${avgStockReturn}% avg return)
+- Mutual Funds: ${mutualFunds.length} funds
+- Status: ${userProfile.finance?.state?.status || 'Unknown'}`;
+        }
+        
+        let travelContext = 'No travel data available';
+        if (travelData) {
+            const upcomingTrips = travelData.upcomingTrips?.filter(t => {
+                return new Date(t.startDate) > new Date() && t.status !== 'Cancelled';
+            }) || [];
+            const pastTrips = travelData.pastTrips?.length || 0;
+            const wishlist = travelData.wishlist?.length || 0;
+            
+            travelContext = `Travel Status:
+- Upcoming Trips: ${upcomingTrips.length} (${upcomingTrips.map(t => `${t.destination} on ${new Date(t.startDate).toLocaleDateString()}`).join(', ') || 'None'})
+- Past Trips: ${pastTrips}
+- Wishlist: ${wishlist} destinations
+- Status: ${userProfile.travel?.state?.status || 'Unknown'}`;
+        }
+        
+        const context = `
+Comprehensive User Profile Analysis - Real Data Training:
+
+HEALTH & WELLNESS:
+${healthContext}
+- Sentiment Analysis: ${userProfile.health?.sentiment || 'neutral'}
+- Key Insights: ${userProfile.health?.state?.summary?.join('; ') || 'No insights'}
+
+FINANCE & INVESTMENTS:
+${financeContext}
+- Sentiment Analysis: ${userProfile.finance?.sentiment || 'neutral'}
+- Key Insights: ${userProfile.finance?.state?.summary?.join('; ') || 'No insights'}
+
+TRAVEL & LIFESTYLE:
+${travelContext}
+- Sentiment Analysis: ${userProfile.travel?.sentiment || 'neutral'}
+- Key Insights: ${userProfile.travel?.state?.summary?.join('; ') || 'No insights'}
+
+STUDY & LEARNING:
+- Sentiment: ${userProfile.study?.sentiment || 'neutral'}
+- Activity: ${userProfile.study?.data?.length || 0} interactions
+
+OVERALL ANALYSIS:
+- Overall Mood Score: ${overallScore || 0}
+- Health Status: ${userProfile.health?.state?.status || 'Unknown'}
+- Portfolio Status: ${userProfile.finance?.state?.status || 'Unknown'}
+- Travel Status: ${userProfile.travel?.state?.status || 'Unknown'}
+
+Based on this comprehensive analysis of REAL user data (health records, portfolio, travel plans), provide personalized, actionable recommendations that:
+1. Address specific health conditions, medications, and exercise patterns
+2. Suggest financial strategies based on actual portfolio performance and savings
+3. Recommend travel optimizations based on upcoming trips and preferences
+4. Provide holistic lifestyle improvements
+
+Format as clear, numbered recommendations with specific actionable steps. Reference the actual data (e.g., "Given your ${healthData?.currentDiseases?.length || 0} active conditions..." or "Your portfolio shows ${avgStockReturn}% returns..."). Make it feel like a personalized AI coach analyzing their complete real-world profile.
+        `.trim();
+
+        // Generate content with model fallback
+        const text = await generateContentWithFallback(context);
+
+        res.status(httpStatus.OK).json({
+            recommendations: text,
+            profileSummary: {
+                overallScore: overallScore || 0,
+                totalInteractions: Object.values(userProfile).reduce((sum, p) => sum + (p.data?.length || 0), 0),
+                domainsAnalyzed: Object.keys(userProfile).length
+            },
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error("Gemini API Error in getSentimentRecommendations:", error);
+        console.error("Error stack:", error.stack);
+        res.status(500).json({ 
+            message: "Failed to generate sentiment recommendations",
+            error: error.message,
+            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+    }
+};
+
+export { getDomainInsights, getSolutionProcedure, getDomainInfo, testModels, getSentimentRecommendations };
 

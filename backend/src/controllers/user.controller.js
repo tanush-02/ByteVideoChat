@@ -4,6 +4,15 @@ import bcrypt from "bcryptjs"
 
 import crypto from "crypto"
 import { Meeting } from "../models/meeting.model.js";
+
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
+
+const resolveRoleForUsername = (username, existingRole) => {
+    if (existingRole) return existingRole;
+    if (username && username.toLowerCase() === ADMIN_USERNAME.toLowerCase()) return "admin";
+    return "user";
+};
+
 const login = async (req, res) => {
 
     const { username, password } = req.body;
@@ -25,8 +34,14 @@ const login = async (req, res) => {
             let token = crypto.randomBytes(20).toString("hex");
 
             user.token = token;
+            user.role = resolveRoleForUsername(user.username, user.role);
             await user.save();
-            return res.status(httpStatus.OK).json({ token: token })
+            return res.status(httpStatus.OK).json({
+                token: token,
+                role: user.role,
+                username: user.username,
+                name: user.name
+            })
         } else {
             return res.status(httpStatus.UNAUTHORIZED).json({ message: "Invalid Username or password" })
         }
@@ -49,10 +64,13 @@ const register = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        const role = resolveRoleForUsername(username);
+
         const newUser = new User({
             name: name,
             username: username,
-            password: hashedPassword
+            password: hashedPassword,
+            role
         });
 
         await newUser.save();

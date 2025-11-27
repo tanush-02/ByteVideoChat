@@ -28,6 +28,195 @@
     margin-top: 0.5rem;
 }
 
+.ai-training-widget {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    backdrop-filter: blur(12px);
+}
+
+.training-copy {
+    flex: 1 1 350px;
+}
+
+.training-copy h3 {
+    color: white;
+    margin: 0.5rem 0 1rem 0;
+}
+
+.training-copy ul {
+    margin: 1rem 0 0 1rem;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.6;
+}
+
+.training-status {
+    flex: 1 1 280px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.training-status p {
+    margin: 0 0 1rem 0;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 16px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #3b82f6, #a855f7);
+    transition: width 0.4s ease;
+}
+
+.training-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.95rem;
+}
+
+.training-steps span.completed {
+    color: #22c55e;
+    font-weight: 600;
+}
+
+.user-insight-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.insight-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 18px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    min-height: 180px;
+}
+
+.insight-header {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.insight-icon {
+    font-size: 2rem;
+}
+
+.insight-label {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.insight-status {
+    margin: 0;
+    font-weight: 700;
+}
+
+.insight-summary {
+    margin: 0;
+    padding-left: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.5;
+}
+
+.personalized-summary-card,
+.recommendations-card {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 1.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    margin-bottom: 1.5rem;
+    backdrop-filter: blur(10px);
+}
+
+.personalized-summary-card h3,
+.recommendations-header span {
+    color: white;
+    margin: 0 0 0.75rem 0;
+}
+
+.personalized-summary-card p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.7;
+}
+
+.recommendations-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: 1rem;
+}
+
+.recommendations-header small {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+}
+
+.recommendations-content {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 1.25rem;
+    min-height: 120px;
+}
+
+.loading-recommendations {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.solution-highlights {
+    margin: 1.5rem 0;
+}
+
+.highlight-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.highlight-chip {
+    padding: 0.45rem 1rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.eyebrow-text {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0 0 0.25rem 0;
+}
+
 /* Domain Selector Section */
 .domain-selector-section {
     margin-bottom: 2rem;
@@ -520,6 +709,15 @@
         top: 0;
         left: 0;
         border-radius: 15px 15px 0 0;
+    }
+
+    .ai-training-widget {
+        flex-direction: column;
+        padding: 1.5rem;
+    }
+
+    .user-insight-grid {
+        grid-template-columns: 1fr;
     }
 }
 

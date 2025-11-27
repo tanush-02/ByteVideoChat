@@ -1,10 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { fetchPendingMeetings, acceptMeetingRequest } from '../services/meetingService'
 
 export default function Meetings() {
+    const navigate = useNavigate()
     const [meetings] = useState([
         {
             id: 1,
-            title: "Team Standup",
+            title: "Dermatology Consultation",
             time: "09:00 AM",
             date: "Today",
             participants: 8,
@@ -12,7 +15,7 @@ export default function Meetings() {
         },
         {
             id: 2,
-            title: "Client Presentation",
+            title: "Cardiology Follow-up",
             time: "02:00 PM",
             date: "Today",
             participants: 12,
@@ -20,7 +23,7 @@ export default function Meetings() {
         },
         {
             id: 3,
-            title: "Project Review",
+            title: "Travel Agent Meeting",
             time: "10:30 AM",
             date: "Yesterday",
             participants: 5,
@@ -28,13 +31,46 @@ export default function Meetings() {
         },
         {
             id: 4,
-            title: "Weekly Sync",
+            title: "Math Tutoring Session",
             time: "11:00 AM",
             date: "Monday",
             participants: 15,
             status: "completed"
         }
     ])
+
+    const [pendingMeetings, setPendingMeetings] = useState([])
+    const [loadingPending, setLoadingPending] = useState(false)
+    const isAdmin = (localStorage.getItem('role') || '').toLowerCase() === 'admin'
+
+    useEffect(() => {
+        if (!isAdmin) return
+        let timer
+        const loadMeetings = async () => {
+            try {
+                setLoadingPending(true)
+                const response = await fetchPendingMeetings()
+                setPendingMeetings(response.meetings || [])
+            } catch (error) {
+                console.error('Failed to load pending meetings', error)
+            } finally {
+                setLoadingPending(false)
+            }
+        }
+        loadMeetings()
+        timer = setInterval(loadMeetings, 15000)
+        return () => clearInterval(timer)
+    }, [isAdmin])
+
+    const handleAccept = async (meetingId, meetingCode) => {
+        try {
+            await acceptMeetingRequest(meetingId)
+            setPendingMeetings((prev) => prev.filter((meeting) => meeting._id !== meetingId))
+            navigate(`/${meetingCode}`)
+        } catch (error) {
+            alert(error.message || 'Failed to accept meeting')
+        }
+    }
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -51,6 +87,47 @@ export default function Meetings() {
                 <h2>Meetings</h2>
                 <button className="primaryButton">+ New Meeting</button>
             </div>
+
+            {isAdmin && (
+                <div className="adminPanel">
+                    <div className="adminPanelHeader">
+                        <h3>Pending Meeting Requests</h3>
+                        {loadingPending && <span className="smallInfo">Refreshing...</span>}
+                    </div>
+                    {pendingMeetings.length === 0 ? (
+                        <p>No pending meetings right now.</p>
+                    ) : (
+                        <div className="meetingsList">
+                            {pendingMeetings.map((meeting) => (
+                                <div key={meeting._id} className="meetingCard">
+                                    <div className="meetingInfo">
+                                        <h3>Meeting Code: {meeting.meetingCode}</h3>
+                                        <div className="meetingDetails">
+                                            <span className="meetingDate">Requested by {meeting.initiator}</span>
+                                            {meeting.scheduledFor && (
+                                                <span className="meetingTime">
+                                                    Scheduled for {new Date(meeting.scheduledFor).toLocaleString()}
+                                                </span>
+                                            )}
+                                            <span className="meetingStatus" style={{ color: '#fbbf24' }}>
+                                                Pending
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="meetingActions">
+                                        <button
+                                            className="actionButton"
+                                            onClick={() => handleAccept(meeting._id, meeting.meetingCode)}
+                                        >
+                                            Accept & Join
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
             
             <div className="meetingsList">
                 {meetings.map((meeting) => (

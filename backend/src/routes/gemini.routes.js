@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getDomainInsights, getSolutionProcedure, getDomainInfo, testModels, getSentimentRecommendations } from "../controllers/gemini.controller.js";
+import { getDomainInsights, getSolutionProcedure, getDomainInfo, testModels, getSentimentRecommendations, getPersonalizedRecommendations } from "../controllers/gemini.controller.js";
 
 const router = Router();
 
@@ -17,6 +17,6 @@ router.route("/info/:domain").get(getDomainInfo);
 
 // Get AI-powered sentiment recommendations
 router.route("/sentiment-recommendations").post(getSentimentRecommendations);
+router.route("/personalized").get(getPersonalizedRecommendations);
 
 export default router;
-

@@ -313,6 +313,27 @@
   text-transform: capitalize;
 }
 
+.adminPanel {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: rgba(148, 163, 184, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.adminPanelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.smallInfo {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
 .actionButton {
   background: rgba(255, 255, 255, 0.2);
   color: white;
@@ -1116,6 +1137,20 @@
 .successContent p {
   margin: 0 0 1rem 0;
   color: rgba(255, 255, 255, 0.8);
+}
+
+.scheduleMessage {
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.scheduleMessage.pending,
+.scheduleMessage.waiting {
+  color: #fde047;
+}
+
+.scheduleMessage.error {
+  color: #f87171;
 }
 
 .copyButton {

@@ -3,12 +3,14 @@ import withAuth from '../utils/withAuth'
 import { useNavigate } from 'react-router-dom'
 import "../App.css";
 import { AuthContext } from '../contexts/AuthContext';
+import { scheduleMeetingRequest } from '../services/meetingService';
 
 function HomeComponent() {
     let navigate = useNavigate();
     const [meetingCode, setMeetingCode] = useState("");
     const [isCreating, setIsCreating] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [scheduleStatus, setScheduleStatus] = useState({ state: 'idle', message: '' });
     const [aiInsights, setAiInsights] = useState({
         mood: 'analyzing',
         nextAction: 'Click to start analysis',
@@ -70,14 +72,31 @@ function HomeComponent() {
         navigate(`/${meetingCode}`)
     }
 
-    let handleCreateMeeting = () => {
+    let handleCreateMeeting = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigate('/auth');
+            return;
+        }
+
         const randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
         setMeetingCode(randomCode);
         setIsCreating(true);
+        setScheduleStatus({ state: 'pending', message: 'Notifying admin...' });
+
+        try {
+            await scheduleMeetingRequest(randomCode);
+            setScheduleStatus({ state: 'waiting', message: 'Waiting for admin to join the meeting...' });
+        } catch (error) {
+            console.error('Failed to schedule meeting', error);
+            setScheduleStatus({ state: 'error', message: error.message || 'Failed to notify admin' });
+        }
     }
 
     let handleLogout = () => {
         localStorage.removeItem("token")
+        localStorage.removeItem("role")
+        localStorage.removeItem("username")
         navigate("/")
     }
 
@@ -288,6 +307,11 @@ function HomeComponent() {
                                     <div className="successContent">
                                         <h4>Meeting Created!</h4>
                                         <p>Share this code with others: <strong>{meetingCode}</strong></p>
+                                        {scheduleStatus.message && (
+                                            <p className={`scheduleMessage ${scheduleStatus.state}`}>
+                                                {scheduleStatus.message}
+                                            </p>
+                                        )}
                                         <button 
                                             className="copyButton"
                                             onClick={() => {

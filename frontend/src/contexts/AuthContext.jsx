@@ -55,6 +55,12 @@ export const AuthProvider = ({ children }) => {
 
             if (request.status === httpStatus.OK) {
                 localStorage.setItem("token", request.data.token);
+                if (request.data.role) {
+                    localStorage.setItem("role", request.data.role);
+                }
+                if (request.data.username) {
+                    localStorage.setItem("username", request.data.username);
+                }
                 const redirect = localStorage.getItem("postLoginRedirect");
                 if (redirect) {
                     localStorage.removeItem("postLoginRedirect");

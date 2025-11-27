@@ -7,6 +7,7 @@ import { connectToSocket } from "./src/controllers/socketManager.js";
 import userRoutes from "./src/routes/users.routes.js";
 import commentRoutes from "./src/routes/comments.routes.js";
 import geminiRoutes from "./src/routes/gemini.routes.js";
+import meetingsRoutes from "./src/routes/meetings.routes.js";
 import healthRoutes from "./src/routes/health.routes.js";
 import financeRoutes from "./src/routes/finance.routes.js";
 import travelRoutes from "./src/routes/travel.routes.js";
@@ -42,6 +43,7 @@ app.use("/api/v1/comments", commentRoutes);
 app.use("/api/v1/ai", geminiRoutes);
 app.use("/api/v1/health", healthRoutes);
 app.use("/api/v1/finance", financeRoutes);
+app.use("/api/v1/meetings", meetingsRoutes);
 app.use("/api/v1/travel", travelRoutes);
 
 // Debug route to check if travel routes are registered

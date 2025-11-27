@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react'
 import { AuthContext } from '../contexts/AuthContext'
-import { getSentimentRecommendations } from '../services/geminiService'
+import { getSentimentRecommendations, getPersonalizedRecommendations } from '../services/geminiService'
 import { analyzeSentiment } from '../services/apiService'
 import { getAllUserData } from '../services/userDataService'
 import MarkdownRenderer from '../components/MarkdownRenderer'
@@ -367,8 +367,12 @@ export default function SentimentAnalysis() {
                 study: profile.study || { sentiment: 'neutral', data: [] }
             }
             
-            // Use the dedicated sentiment recommendations endpoint
-            const recommendation = await getSentimentRecommendations(enhancedProfile, overallScore, userData)
+            let recommendation = null
+            try {
+                recommendation = await getPersonalizedRecommendations()
+            } catch (e) {
+                recommendation = await getSentimentRecommendations(enhancedProfile, overallScore, userData)
+            }
             setAiRecommendations(recommendation)
         } catch (error) {
             console.error('Error generating AI recommendations:', error)
@@ -689,4 +693,3 @@ export default function SentimentAnalysis() {
         </div>
     )
 }
-

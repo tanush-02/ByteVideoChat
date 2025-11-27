@@ -4,7 +4,7 @@ export default function Meetings() {
     const [meetings] = useState([
         {
             id: 1,
-            title: "Team Standup",
+            title: "Dermatology Consultation",
             time: "09:00 AM",
             date: "Today",
             participants: 8,
@@ -12,7 +12,7 @@ export default function Meetings() {
         },
         {
             id: 2,
-            title: "Client Presentation",
+            title: "Cardiology Follow-up",
             time: "02:00 PM",
             date: "Today",
             participants: 12,
@@ -20,7 +20,7 @@ export default function Meetings() {
         },
         {
             id: 3,
-            title: "Project Review",
+            title: "Travel Agent Meeting",
             time: "10:30 AM",
             date: "Yesterday",
             participants: 5,
@@ -28,7 +28,7 @@ export default function Meetings() {
         },
         {
             id: 4,
-            title: "Weekly Sync",
+            title: "Math Tutoring Session",
             time: "11:00 AM",
             date: "Monday",
             participants: 15,

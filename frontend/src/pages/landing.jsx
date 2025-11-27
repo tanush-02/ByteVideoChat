@@ -93,7 +93,7 @@ export default function LandingPage() {
                     {isLoggedIn ? (
                         <>
                             <div className="btn btn-primary" onClick={() => navigate("/home")} role='button'>
-                                Chat
+                                VideoChat
                             </div>
                             <div className="btn btn-danger" onClick={handleLogout} role='button'>
                                 Logout

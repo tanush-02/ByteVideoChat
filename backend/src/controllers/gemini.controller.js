@@ -1,5 +1,9 @@
 import httpStatus from "http-status";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { User } from "../models/user.model.js";
+import { Health } from "../models/health.model.js";
+import { Finance } from "../models/finance.model.js";
+import { Travel } from "../models/travel.model.js";
 
 // Get API key from environment variables (will be set after dotenv.config() in app.js)
 // Use a function to get it lazily to ensure dotenv has loaded
@@ -27,6 +31,12 @@ const getGenAI = () => {
 // Cache for available model (to avoid repeated API calls)
 let cachedModel = null;
 let modelName = null;
+
+const isQuotaError = (error) => {
+    if (!error) return false;
+    const msg = error.message?.toLowerCase() || "";
+    return error.status === 429 || msg.includes("quota") || msg.includes("too many requests");
+};
 
 // Helper function to get an available model
 const getAvailableModel = async () => {
@@ -166,6 +176,16 @@ Context: ${context || 'General travel advice'}`,
             timestamp: new Date().toISOString()
         });
     } catch (error) {
+        if (isQuotaError(error)) {
+            const fallbackInsight = generateFallbackInsight(domain, context);
+            return res.status(httpStatus.OK).json({
+                domain,
+                insight: fallbackInsight,
+                timestamp: new Date().toISOString(),
+                fallback: true,
+                notice: "Gemini quota reached, showing smart fallback insight."
+            });
+        }
         console.error("Gemini API Error in getDomainInsights:", error);
         console.error("Error stack:", error.stack);
         res.status(500).json({ 
@@ -241,6 +261,20 @@ Context: ${context || 'General travel planning'}`,
             timestamp: new Date().toISOString()
         });
     } catch (error) {
+        if (isQuotaError(error)) {
+            console.warn("Gemini quota reached. Using fallback procedure.");
+            const fallbackProcedure = generateFallbackProcedure(domain, query, context);
+            const fallbackSteps = ensureSteps(extractSteps(fallbackProcedure), fallbackProcedure);
+            return res.status(httpStatus.OK).json({
+                domain,
+                query: query || 'General solution',
+                procedure: fallbackProcedure,
+                steps: fallbackSteps,
+                timestamp: new Date().toISOString(),
+                fallback: true,
+                notice: "Gemini quota reached, showing smart fallback procedure."
+            });
+        }
         console.log("=== AI QUERY ERROR DEBUG ===");
         console.error("Error type:", error.constructor.name);
         console.error("Error message:", error.message);
@@ -304,6 +338,16 @@ Format the response in a structured, easy-to-read format.`;
             timestamp: new Date().toISOString()
         });
     } catch (error) {
+        if (isQuotaError(error)) {
+            const fallbackInfo = generateFallbackInfo(domain);
+            return res.status(httpStatus.OK).json({
+                domain,
+                information: fallbackInfo,
+                timestamp: new Date().toISOString(),
+                fallback: true,
+                notice: "Gemini quota reached, showing smart fallback information."
+            });
+        }
         console.error("Gemini API Error in getDomainInfo:", error);
         console.error("Error stack:", error.stack);
         res.status(500).json({ 
@@ -461,8 +505,18 @@ Based on this comprehensive analysis of REAL user data (health records, portfoli
 Format as clear, numbered recommendations with specific actionable steps. Reference the actual data (e.g., "Given your ${healthData?.currentDiseases?.length || 0} active conditions..." or "Your portfolio shows ${avgStockReturn}% returns..."). Make it feel like a personalized AI coach analyzing their complete real-world profile.
         `.trim();
 
-        // Generate content with model fallback
-        const text = await generateContentWithFallback(context);
+        let text;
+        let usedFallback = false;
+        try {
+            text = await generateContentWithFallback(context);
+        } catch (error) {
+            if (isQuotaError(error)) {
+                text = generateFallbackRecommendations(userProfile, overallScore);
+                usedFallback = true;
+            } else {
+                throw error;
+            }
+        }
 
         res.status(httpStatus.OK).json({
             recommendations: text,
@@ -471,9 +525,25 @@ Format as clear, numbered recommendations with specific actionable steps. Refere
                 totalInteractions: Object.values(userProfile).reduce((sum, p) => sum + (p.data?.length || 0), 0),
                 domainsAnalyzed: Object.keys(userProfile).length
             },
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            fallback: usedFallback || undefined,
+            notice: usedFallback ? "Gemini quota reached, showing smart fallback recommendations." : undefined
         });
     } catch (error) {
+        if (isQuotaError(error)) {
+            const fallbackText = generateFallbackRecommendations(userProfile, overallScore);
+            return res.status(httpStatus.OK).json({
+                recommendations: fallbackText,
+                profileSummary: {
+                    overallScore: overallScore || 0,
+                    totalInteractions: Object.values(userProfile).reduce((sum, p) => sum + (p.data?.length || 0), 0),
+                    domainsAnalyzed: Object.keys(userProfile).length
+                },
+                timestamp: new Date().toISOString(),
+                fallback: true,
+                notice: "Gemini quota reached, showing smart fallback recommendations."
+            });
+        }
         console.error("Gemini API Error in getSentimentRecommendations:", error);
         console.error("Error stack:", error.stack);
         res.status(500).json({ 
@@ -484,5 +554,287 @@ Format as clear, numbered recommendations with specific actionable steps. Refere
     }
 };
 
-export { getDomainInsights, getSolutionProcedure, getDomainInfo, testModels, getSentimentRecommendations };
+const getPersonalizedRecommendations = async (req, res) => {
+    try {
+        const { token } = req.query;
+        if (!token) {
+            return res.status(400).json({ message: "Token is required" });
+        }
 
+        const user = await User.findOne({ token });
+        if (!user) {
+            return res.status(httpStatus.UNAUTHORIZED).json({ message: "User not found" });
+        }
+
+        const [healthRecord, financeRecord, travelRecord] = await Promise.all([
+            Health.findOne({ userId: user.username }),
+            Finance.findOne({ userId: user.username }),
+            Travel.findOne({ userId: user.username })
+        ]);
+
+        let healthScore = 0;
+        let healthStatus = "No health data available";
+        let healthSummary = [];
+        if (healthRecord) {
+            const severeCount = (healthRecord.currentDiseases || []).filter(d => d.severity === 'Severe').length;
+            const currentCount = (healthRecord.currentDiseases || []).length;
+            if (currentCount > 0) {
+                healthScore -= severeCount * 0.5;
+                healthScore -= (currentCount - severeCount) * 0.2;
+                healthStatus = `${currentCount} active condition${currentCount > 1 ? 's' : ''}`;
+                healthSummary.push(`${currentCount} current condition(s)`);
+            } else {
+                healthScore += 0.3;
+                healthStatus = 'No active conditions';
+                healthSummary.push('No current health issues');
+            }
+            const activeMeds = (healthRecord.medications || []).filter(m => m.isActive);
+            if (activeMeds.length > 0) {
+                healthSummary.push(`${activeMeds.length} active medication(s)`);
+            }
+            const recentExercises = (healthRecord.exercises || []).filter(e => {
+                const daysAgo = (Date.now() - new Date(e.date).getTime()) / (1000 * 60 * 60 * 24);
+                return daysAgo <= 7;
+            });
+            if (recentExercises.length > 0) {
+                healthScore += 0.3;
+                healthSummary.push(`${recentExercises.length} exercise(s) this week`);
+            }
+            const recentMetrics = (healthRecord.dailyMetrics || []).slice(-7);
+            if (recentMetrics.length > 0) {
+                const avgSteps = recentMetrics.reduce((sum, m) => sum + (m.steps || 0), 0) / recentMetrics.length;
+                if (avgSteps > 5000) healthScore += 0.2;
+                healthSummary.push(`Avg ${Math.round(avgSteps)} steps/day`);
+            }
+            const upcomingCheckups = (healthRecord.checkups || []).filter(c => new Date(c.scheduledDate) > new Date());
+            if (upcomingCheckups.length > 0) {
+                healthSummary.push(`${upcomingCheckups.length} upcoming checkup(s)`);
+            }
+        }
+
+        let financeScore = 0;
+        let financeStatus = "No finance data available";
+        let financeSummary = [];
+        if (financeRecord) {
+            const totalSavings = financeRecord.savings?.total || 0;
+            if (totalSavings > 0) {
+                financeScore += 0.2;
+                financeStatus = `₹${(totalSavings / 100000).toFixed(1)}L in savings`;
+                financeSummary.push(`₹${(totalSavings / 1000).toFixed(0)}K total savings`);
+            }
+            const stocks = financeRecord.investments?.stocks || [];
+            const mutualFunds = financeRecord.investments?.mutualFunds || [];
+            const totalInvestments = financeRecord.investments?.total || 0;
+            if (stocks.length > 0) {
+                const profitPercent = stocks.reduce((sum, s) => sum + (s.profitLossPercent || 0), 0) / stocks.length;
+                if (profitPercent > 0) {
+                    financeScore += 0.3;
+                } else {
+                    financeScore -= 0.1;
+                }
+                financeSummary.push(`${stocks.length} stock(s), ${profitPercent.toFixed(1)}% avg return`);
+            }
+            if (mutualFunds.length > 0) {
+                const mfProfitPercent = mutualFunds.reduce((sum, mf) => sum + (mf.profitLossPercent || 0), 0) / mutualFunds.length;
+                if (mfProfitPercent > 0) financeScore += 0.2;
+                financeSummary.push(`${mutualFunds.length} mutual fund(s), ${mfProfitPercent.toFixed(1)}% avg return`);
+            }
+            if (totalInvestments > 0) {
+                financeStatus = `₹${(totalInvestments / 100000).toFixed(1)}L portfolio`;
+                financeSummary.push(`₹${(totalInvestments / 1000).toFixed(0)}K total investments`);
+            }
+            const recentTransactions = (financeRecord.transactions || []).slice(-10);
+            if (recentTransactions.length > 0) {
+                const expenses = recentTransactions.filter(t => t.type === 'Expense').reduce((sum, t) => sum + (t.amount || 0), 0);
+                const income = recentTransactions.filter(t => t.type === 'Income').reduce((sum, t) => sum + (t.amount || 0), 0);
+                if (income > expenses) {
+                    financeScore += 0.2;
+                    financeSummary.push(`Positive cash flow: ₹${((income - expenses) / 1000).toFixed(0)}K`);
+                } else {
+                    financeScore -= 0.1;
+                    financeSummary.push(`Negative cash flow: ₹${((expenses - income) / 1000).toFixed(0)}K`);
+                }
+            }
+        }
+
+        let travelScore = 0;
+        let travelStatus = "No travel data available";
+        let travelSummary = [];
+        if (travelRecord) {
+            const upcomingTrips = (travelRecord.upcomingTrips || []).filter(t => new Date(t.startDate) > new Date() && t.status !== 'Cancelled');
+            if (upcomingTrips.length > 0) {
+                travelScore += 0.4;
+                travelStatus = `${upcomingTrips.length} upcoming trip${upcomingTrips.length > 1 ? 's' : ''}`;
+                travelSummary.push(`${upcomingTrips.length} upcoming trip(s)`);
+            }
+            const pastTrips = travelRecord.pastTrips || [];
+            if (pastTrips.length > 0) {
+                const avgRating = pastTrips.reduce((sum, t) => sum + (t.rating || 0), 0) / pastTrips.length;
+                if (avgRating >= 4) travelScore += 0.2;
+                travelSummary.push(`${pastTrips.length} past trip(s), ${avgRating.toFixed(1)} avg rating`);
+            }
+            const wishlist = travelRecord.wishlist || [];
+            if (wishlist.length > 0) {
+                travelScore += 0.1;
+                travelSummary.push(`${wishlist.length} destination(s) in wishlist`);
+            }
+            if (upcomingTrips.length === 0 && pastTrips.length === 0) {
+                travelStatus = 'No travel plans';
+            }
+        }
+
+        const overallScore = [healthScore, financeScore, travelScore].reduce((sum, s) => sum + s, 0) / 3;
+
+        const healthContext = healthRecord ? `Current Health Status:
+- Status: ${healthStatus}
+- Insights: ${healthSummary.join('; ') || 'None'}` : 'No health data available';
+        const financeContext = financeRecord ? `Portfolio Status:
+- Status: ${financeStatus}
+- Insights: ${financeSummary.join('; ') || 'None'}` : 'No finance data available';
+        const travelContext = travelRecord ? `Travel Status:
+- Status: ${travelStatus}
+- Insights: ${travelSummary.join('; ') || 'None'}` : 'No travel data available';
+
+        const context = `Comprehensive User Profile Analysis - Real Data Training:
+
+HEALTH & WELLNESS:
+${healthContext}
+
+FINANCE & INVESTMENTS:
+${financeContext}
+
+TRAVEL & LIFESTYLE:
+${travelContext}
+
+OVERALL ANALYSIS:
+- Overall Mood Score: ${overallScore}
+
+Based on this comprehensive analysis of real user data, provide personalized, actionable recommendations for health and finance, including immediate steps and medium-term plans. Format as clear, numbered recommendations with specific actions and thresholds.`;
+
+        const text = await generateContentWithFallback(context);
+
+        return res.status(httpStatus.OK).json({
+            recommendations: text,
+            profileSummary: {
+                overallScore,
+                domainsAnalyzed: ['health', 'finance', 'travel'].filter(d => {
+                    if (d === 'health') return !!healthRecord;
+                    if (d === 'finance') return !!financeRecord;
+                    if (d === 'travel') return !!travelRecord;
+                }).length
+            },
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        return res.status(500).json({ message: "Failed to generate personalized recommendations", error: error.message });
+    }
+};
+
+const generateFallbackProcedure = (domain, query, context) => {
+    const templates = {
+        finance: [
+            "Evaluate current income, expenses, and outstanding liabilities",
+            "Define short, medium, and long-term financial goals",
+            "Cover essentials first: emergency fund, insurance, risk mitigation",
+            "Allocate investments across equity, debt, and alternatives",
+            "Automate savings, SIPs, and bill payments",
+            "Review portfolio performance monthly and rebalance quarterly",
+            "Track progress, adjust budgets, and note regulatory changes"
+        ],
+        healthcare: [
+            "Capture current health metrics, medications, and lifestyle habits",
+            "Set measurable wellness goals (sleep, activity, nutrition)",
+            "Design daily routines for meals, hydration, exercise, and rest",
+            "Schedule preventive checkups and medicine adherence reminders",
+            "Log symptoms, vitals, and mood in a weekly tracker",
+            "Build support network: doctors, specialists, emergency contacts",
+            "Review goals fortnightly and adjust with medical guidance"
+        ],
+        study: [
+            "List subjects, topics, and current proficiency for each",
+            "Set SMART goals with timelines and success criteria",
+            "Create weekly timetable with focused study blocks & breaks",
+            "Use active recall, spaced repetition, and mock tests",
+            "Consolidate notes using mind maps and flashcards",
+            "Track progress through quizzes and mentor feedback",
+            "Iterate plan every two weeks based on performance"
+        ],
+        travel: [
+            "Define trip objective, budget, and preferred dates",
+            "Research destinations, visa needs, and weather",
+            "Book transport and stay with cancellation buffers",
+            "Plan daily itinerary with must-visit and rest periods",
+            "Arrange insurance, emergency contacts, and backups",
+            "Pack essentials aligned with climate and activities",
+            "Confirm bookings 48 hours prior and monitor alerts"
+        ]
+    };
+    const steps = templates[domain] || templates.travel;
+    return steps.map((step, idx) => `${idx + 1}. ${step}`).join("\n");
+};
+
+const ensureSteps = (steps, fallbackProcedure) => {
+    if (steps && steps.length > 0) return steps;
+    return fallbackProcedure.split('\n').map((line, idx) => {
+        const cleaned = line.replace(/^\d+[.)]\s*/, '').trim();
+        if (!cleaned) return null;
+        return { number: idx + 1, description: cleaned };
+    }).filter(Boolean);
+};
+
+const generateFallbackInsight = (domain, context) => {
+    const insights = {
+        finance: "Focus on resilient budgeting, diversified investments, and periodic reviews. Preserve emergency funds and automate goals.",
+        healthcare: "Balance nutrition, exercise, and rest. Track vitals weekly, schedule preventive checkups, and manage stress intentionally.",
+        study: "Use structured plans with active recall, spaced repetition, and consistent reviews. Reflect weekly and adjust workload.",
+        travel: "Plan early with flexible options, confirm documentation, and keep contingency buffers for transport and stay."
+    };
+    return `${insights[domain] || "Maintain balance and track measurable progress."}\nContext Reference: ${context || "General guidance"}`;
+};
+
+const generateFallbackInfo = (domain) => {
+    const info = {
+        finance: `Finance Overview:
+1. Importance: Enables wealth creation, protection, and legacy planning
+2. Key Concepts: Budgeting, investing, insurance, credit management
+3. Trends: Digital finance, robo-advisors, sustainable investing
+4. Best Practices: Diversification, emergency funds, periodic review
+5. Challenges: Market volatility, inflation, behavioral biases`,
+        healthcare: `Healthcare Overview:
+1. Importance: Prevents disease, extends lifespan, improves quality of life
+2. Concepts: Preventive care, chronic management, lifestyle medicine
+3. Trends: Telehealth, wearables, personalized treatments
+4. Practices: Regular screening, balanced lifestyle, adherence
+5. Challenges: Access, continuity, misinformation`,
+        study: `Study Overview:
+1. Importance: Builds knowledge, skills, and competitiveness
+2. Concepts: Active learning, feedback loops, mastery learning
+3. Trends: Microlearning, AI tutoring, collaborative platforms
+4. Practices: SMART goals, consistent schedule, assessments
+5. Challenges: Distractions, motivation, retention`,
+        travel: `Travel Overview:
+1. Importance: Expands perspective, supports mental wellness
+2. Concepts: Planning, budgeting, cultural readiness
+3. Trends: Sustainable tourism, experiential travel, remote work trips
+4. Practices: Early research, flexibility, contingency planning
+5. Challenges: Costs, safety, regulations`
+    };
+    return info[domain] || info.travel;
+};
+
+const generateFallbackRecommendations = (profile, overallScore) => {
+    const sections = [];
+    if (profile.health?.state) {
+        sections.push(`Health: ${profile.health.state.status}. Focus on ${profile.health.state.summary?.join(', ') || 'consistent routines and preventive care'}.`);
+    }
+    if (profile.finance?.state) {
+        sections.push(`Finance: ${profile.finance.state.status}. Prioritize ${profile.finance.state.summary?.join(', ') || 'budget discipline and portfolio review'}.`);
+    }
+    if (profile.travel?.state) {
+        sections.push(`Travel: ${profile.travel.state.status}. Plan around ${profile.travel.state.summary?.join(', ') || 'structured itineraries with contingency buffers'}.`);
+    }
+    sections.push(`Overall Mood Score: ${(overallScore || 0).toFixed(2)}. Track metrics weekly and recalibrate every fortnight.`);
+    return `AI Guidance (Offline Model):\n${sections.map((section, idx) => `${idx + 1}. ${section}`).join('\n')}`;
+};
+
+export { getDomainInsights, getSolutionProcedure, getDomainInfo, testModels, getSentimentRecommendations, getPersonalizedRecommendations };

@@ -248,7 +248,8 @@
 }
 
 .form-grid input,
-.form-grid select {
+.form-grid select,
+.form-grid textarea {
     padding: 0.75rem;
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.3);
@@ -258,15 +259,22 @@
     backdrop-filter: blur(10px);
 }
 
-.form-grid input::placeholder {
+.form-grid input::placeholder,
+.form-grid textarea::placeholder {
     color: rgba(255, 255, 255, 0.5);
 }
 
 .form-grid input:focus,
-.form-grid select:focus {
+.form-grid select:focus,
+.form-grid textarea:focus {
     outline: none;
     border-color: rgba(102, 126, 234, 0.6);
     background: rgba(255, 255, 255, 0.15);
+}
+
+.form-grid textarea {
+    resize: vertical;
+    min-height: 80px;
 }
 
 .form-grid select option {
@@ -373,6 +381,27 @@
 .stock-detail-item.negative {
     color: #ef4444;
     font-weight: 600;
+}
+
+.stock-notes {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stock-notes span {
+    display: block;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 0.25rem;
+}
+
+.stock-notes p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.4;
 }
 
 /* Transactions */

@@ -59,7 +59,9 @@ export default function Finance() {
         name: '',
         quantity: '',
         buyPrice: '',
-        currentPrice: ''
+        currentPrice: '',
+        purchaseDate: new Date().toISOString().split('T')[0],
+        notes: ''
     })
     const [newSavings, setNewSavings] = useState({
         name: '',
@@ -199,6 +201,11 @@ export default function Finance() {
             alert("Please login to add stocks")
             return
         }
+
+        if (!newStock.symbol || !newStock.name || !newStock.quantity || !newStock.buyPrice) {
+            alert("Please fill in all required fields for the stock")
+            return
+        }
         
         try {
             const stock = {
@@ -208,7 +215,9 @@ export default function Finance() {
                 buyPrice: parseFloat(newStock.buyPrice),
                 currentPrice: parseFloat(newStock.currentPrice || newStock.buyPrice),
                 totalInvested: parseFloat(newStock.quantity) * parseFloat(newStock.buyPrice),
-                currentValue: parseFloat(newStock.quantity) * parseFloat(newStock.currentPrice || newStock.buyPrice)
+                currentValue: parseFloat(newStock.quantity) * parseFloat(newStock.currentPrice || newStock.buyPrice),
+                purchaseDate: newStock.purchaseDate ? new Date(newStock.purchaseDate) : new Date(),
+                notes: newStock.notes?.trim() || ''
             }
             stock.profitLoss = stock.currentValue - stock.totalInvested
             stock.profitLossPercent = (stock.profitLoss / stock.totalInvested) * 100
@@ -217,7 +226,15 @@ export default function Finance() {
             const data = await getFinanceData(token)
             setFinanceData(data)
             setShowAddStock(false)
-            setNewStock({ symbol: '', name: '', quantity: '', buyPrice: '', currentPrice: '' })
+            setNewStock({
+                symbol: '',
+                name: '',
+                quantity: '',
+                buyPrice: '',
+                currentPrice: '',
+                purchaseDate: new Date().toISOString().split('T')[0],
+                notes: ''
+            })
         } catch (error) {
             console.error("Error adding stock:", error)
             alert("Failed to add stock")
@@ -557,6 +574,17 @@ export default function Finance() {
                                             value={newStock.currentPrice}
                                             onChange={(e) => setNewStock({...newStock, currentPrice: e.target.value})}
                                         />
+                                        <input
+                                            type="date"
+                                            placeholder="Purchase Date"
+                                            value={newStock.purchaseDate}
+                                            onChange={(e) => setNewStock({...newStock, purchaseDate: e.target.value})}
+                                        />
+                                        <textarea
+                                            placeholder="Notes (optional)"
+                                            value={newStock.notes}
+                                            onChange={(e) => setNewStock({...newStock, notes: e.target.value})}
+                                        />
                                     </div>
                                     <div className="form-actions">
                                         <button className="submit-button" onClick={handleAddStock}>Add Stock</button>
@@ -614,6 +642,16 @@ export default function Finance() {
                                                         ({stock.profitLossPercent?.toFixed(2) || 0}%)
                                                     </span>
                                                 </div>
+                                                <div className="stock-detail-item">
+                                                    <span>Purchased On:</span>
+                                                    <span>{formatDate(stock.purchaseDate || stock.createdAt)}</span>
+                                                </div>
+                                                {stock.notes && (
+                                                    <div className="stock-notes">
+                                                        <span>Notes:</span>
+                                                        <p>{stock.notes}</p>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     ))}

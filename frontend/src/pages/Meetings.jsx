@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { fetchPendingMeetings, acceptMeetingRequest } from '../services/meetingService'
+import { fetchPendingMeetings, acceptMeetingRequest, scheduleMeetingRequest } from '../services/meetingService'
 
 export default function Meetings() {
     const navigate = useNavigate()
@@ -41,6 +41,7 @@ export default function Meetings() {
 
     const [pendingMeetings, setPendingMeetings] = useState([])
     const [loadingPending, setLoadingPending] = useState(false)
+    const [creatingMeeting, setCreatingMeeting] = useState(false)
     const isAdmin = (localStorage.getItem('role') || '').toLowerCase() === 'admin'
 
     useEffect(() => {
@@ -61,6 +62,21 @@ export default function Meetings() {
         timer = setInterval(loadMeetings, 15000)
         return () => clearInterval(timer)
     }, [isAdmin])
+
+    const handleCreateMeeting = async () => {
+        try {
+            setCreatingMeeting(true)
+            const randomCode = Math.random().toString(36).substring(2, 8).toUpperCase()
+            await scheduleMeetingRequest(randomCode)
+            alert(`Meeting created! Code: ${randomCode}\nWaiting for admin to join...`)
+            // Optionally navigate to home or stay on meetings page
+            // navigate('/home')
+        } catch (error) {
+            alert(error.message || 'Failed to create meeting')
+        } finally {
+            setCreatingMeeting(false)
+        }
+    }
 
     const handleAccept = async (meetingId, meetingCode) => {
         try {
@@ -85,7 +101,13 @@ export default function Meetings() {
         <div className="pageContainer">
             <div className="pageHeader">
                 <h2>Meetings</h2>
-                <button className="primaryButton">+ New Meeting</button>
+                <button 
+                    className="primaryButton" 
+                    onClick={handleCreateMeeting}
+                    disabled={creatingMeeting}
+                >
+                    {creatingMeeting ? 'Creating...' : '+ New Meeting'}
+                </button>
             </div>
 
             {isAdmin && (

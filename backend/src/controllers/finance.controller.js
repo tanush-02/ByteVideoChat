@@ -146,7 +146,18 @@ const addStock = async (req, res) => {
             financeRecord = new Finance({ userId: user.username });
         }
 
-        financeRecord.investments.stocks.push(stock);
+        const purchaseDate = stock.purchaseDate ? new Date(stock.purchaseDate) : new Date();
+        const preparedStock = {
+            ...stock,
+            purchaseDate,
+            notes: stock.notes || ''
+        };
+
+        financeRecord.investments.stocks.push(preparedStock);
+        const newStockEntry = financeRecord.investments.stocks[financeRecord.investments.stocks.length - 1];
+
+        const investmentAmount = newStockEntry.totalInvested || (newStockEntry.quantity * newStockEntry.buyPrice);
+
         // Recalculate investments total
         const stocksTotal = financeRecord.investments.stocks.reduce(
             (sum, s) => sum + (s.currentValue || s.totalInvested || 0), 0
@@ -158,6 +169,19 @@ const addStock = async (req, res) => {
             (sum, inv) => sum + (inv.currentValue || inv.amount || 0), 0
         );
         financeRecord.investments.total = stocksTotal + mfTotal + otherTotal;
+
+        // Log the stock purchase as an investment transaction
+        financeRecord.transactions.unshift({
+            type: "Investment",
+            category: "Stocks",
+            amount: investmentAmount,
+            description: `Bought ${newStockEntry.quantity} ${newStockEntry.symbol} @ ₹${newStockEntry.buyPrice}`,
+            date: newStockEntry.purchaseDate,
+            paymentMethod: "Bank Transfer",
+            tags: ["Stocks", newStockEntry.symbol],
+            relatedInvestment: newStockEntry?._id?.toString()
+        });
+
         await financeRecord.save();
         return res.status(httpStatus.CREATED).json({ message: "Stock added", data: financeRecord });
     } catch (e) {
